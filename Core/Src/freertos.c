@@ -379,6 +379,7 @@ void Loop200hzTask(void *argument)
 	while(!initialed_task){
 		osDelay(1000);
 	}
+	comm_data_flush();
   /* Infinite loop */
   for(;;)
   {

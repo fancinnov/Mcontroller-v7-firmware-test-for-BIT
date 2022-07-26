@@ -375,7 +375,7 @@ extern uint8_t COMM_0, COMM_1, COMM_2, COMM_3, COMM_4;
  * (4)TFMINI_COMM  	TFmini激光测距仪
  * **************************************/
 void config_comm(uint8_t comm0, uint8_t comm1, uint8_t comm2, uint8_t comm3, uint8_t comm4);
-
+void comm_data_flush(void);//清空USB和串口接收缓存
 /*****************************以下为usb+串口接收数据相关函数******************************/
 uint16_t get_comm0_available(void);	//判断usb口是否有数据收到,有数据收到则返回接收到的byte数,没有数据收到返回0;	(注意：该函数只有在usb口是自定义模式 DEV_COMM 时才有效)
 uint16_t get_comm1_available(void);	//判断串口1是否有数据收到,有数据收到则返回接收到的byte数,没有数据收到返回0;	(注意：该函数只有在串口1是自定义模式 DEV_COMM 时才有效)
