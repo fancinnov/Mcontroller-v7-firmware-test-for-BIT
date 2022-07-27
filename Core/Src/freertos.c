@@ -300,11 +300,11 @@ void InitTask(void *argument)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN InitTask */
   reset_usb();
+  config_comm(MAV_COMM, GPS_COMM, MAV_COMM|MLINK_ESP, TFMINI_COMM, MAV_COMM|MLINK_ESP);
   set_s1_baudrate(115200);
   set_s2_baudrate(115200);
   set_s3_baudrate(115200);
   set_s4_baudrate(115200);
-  config_comm(MAV_COMM, GPS_COMM, MAV_COMM|MLINK_ESP, TFMINI_COMM, MAV_COMM|MLINK_ESP);
   usb_printf("\r\nSystem initializing ...\r\n");
   FRAM_Init();
   update_dataflash();
