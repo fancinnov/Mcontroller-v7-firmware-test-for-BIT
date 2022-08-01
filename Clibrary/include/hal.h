@@ -27,6 +27,7 @@
 #include "usart.h"
 #include "adc.h"
 #include "spi.h"
+#include "rtc.h"
 #include "common/mavlink.h"
 #include "usbd_cdc_if.h"
 #include "define.h"
@@ -156,17 +157,6 @@ typedef enum MOTOR_TYPE{
 	SERVO,
 }MOTOR_TYPE;
 
-extern DMA_HandleTypeDef hdma_uart4_rx;
-extern DMA_HandleTypeDef hdma_uart7_rx;
-extern DMA_HandleTypeDef hdma_uart8_rx;
-extern DMA_HandleTypeDef hdma_uart8_tx;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart3_rx;
-extern DMA_HandleTypeDef hdma_usart3_tx;
-extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart3;
-extern UART_HandleTypeDef huart7;
-extern UART_HandleTypeDef huart8;
 extern MPU6000_Data mpu6000_data;
 extern MPU9250_Data mpu9250_data;
 extern ICM20608_Data icm20608_data;
@@ -351,9 +341,13 @@ void Flash_Read_Data(uint32_t addr, uint8_t *data, uint8_t length);
  * */
 extern uint16_t gnss_point_num;
 extern Vector3_Float *gnss_point_prt;
+extern uint16_t *log_file_index_prt;
+extern uint16_t log_file_index_num;
 FRESULT sd_log_start(void);
 FRESULT Write_Gnss_File(void);
 FRESULT Read_Gnss_File(void);
+FRESULT sd_get_file_name(void);
+void sd_send_log_file(mavlink_channel_t chan, uint16_t file_index);
 void sd_log_write(const char* s, ...);
 void sd_log_end(void);
 void sd_log_close(void);

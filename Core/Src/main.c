@@ -25,6 +25,7 @@
 #include "fatfs.h"
 #include "fdcan.h"
 #include "i2c.h"
+#include "rtc.h"
 #include "sdmmc.h"
 #include "spi.h"
 #include "tim.h"
@@ -146,6 +147,7 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM13_Init();
   MX_TIM14_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Base_Start_IT(&htim3);

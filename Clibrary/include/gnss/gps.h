@@ -51,6 +51,12 @@ extern "C" {
 	{
 		uint64_t timestamp; // required for logger
 		uint64_t time_utc_usec;
+		uint16_t year; 		/**< Year (UTC)*/
+		uint8_t	month; 		/**< Month, range 1..12 (UTC) */
+		uint8_t	day; 		/**< Day of month, range 1..31 (UTC) */
+		uint8_t	hour; 		/**< Hour of day, range 0..23 (UTC) */
+		uint8_t	min; 		/**< Minute of hour, range 0..59 (UTC) */
+		uint8_t	sec;		/**< Seconds of minute, range 0..60 (UTC) */
 		int32_t lat;
 		int32_t lon;
 		int32_t alt;
@@ -85,19 +91,6 @@ extern "C" {
 		float alt_noise;
 		uint8_t _padding0[5]; // required for logger
 	}vehicle_gps_position_s;
-
-	struct tm
-	{
-		int tm_sec;     /* second (0-61, allows for leap seconds) */
-		int tm_min;     /* minute (0-59) */
-		int tm_hour;    /* hour (0-23) */
-		int tm_mday;    /* day of the month (1-31) */
-		int tm_mon;     /* month (0-11) */
-		int tm_year;    /* years since 1900 */
-		int tm_wday;    /* day of the week (0-6) */                         /*not supported by NuttX*/
-		int tm_yday;    /* day of the year (0-365) */                       /*not supported by NuttX*/
-		int tm_isdst;   /* non-0 if daylight savings time is in effect */   /*not supported by NuttX*/
-	};
 
 	struct SurveyInStatus
 	{

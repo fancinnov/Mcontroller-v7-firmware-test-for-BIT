@@ -1832,6 +1832,8 @@ void ekf_rf_alt(void){
 	ekf_rangefinder->update(get_rangefinder_data, get_rangefinder_alt());
 }
 
+static RTC_TimeTypeDef sTime;
+static RTC_DateTypeDef sDate;
 void gnss_update(void){
 	if(get_gps_state()){
 		if(!initial_gnss){
@@ -1840,6 +1842,14 @@ void gnss_update(void){
 			gnss_origin_pos.alt=gps_position->alt/10;//海拔：cm
 			initial_gnss=true;
 		}
+		sDate.Year=gps_position->year-1970;
+		sDate.Month=gps_position->month;
+		sDate.Date=gps_position->day;
+		sTime.Hours=gps_position->hour+(gps_position->lon/1e7/15+1);
+		sTime.Minutes=gps_position->min;
+		sTime.Seconds=gps_position->sec;
+		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+		HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 		get_gnss_location=true;
 		gnss_current_pos.lat=gps_position->lat;//纬度:deg*1e-7
 		gnss_current_pos.lng=gps_position->lon;//经度:deg*1e-7

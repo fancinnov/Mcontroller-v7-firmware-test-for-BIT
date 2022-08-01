@@ -540,7 +540,7 @@ void GnssTask(void *argument)
 #if USE_GNSS==0
 	osThreadTerminate(gnssTaskHandle);
 #endif
-	GPS_Init(UBLOX); // GPS_Init() task will block 10s
+	GPS_Init(UM482); // GPS_Init() task will block 10s
     uint8_t state_flag=0;
   /* Infinite loop */
   for(;;)
