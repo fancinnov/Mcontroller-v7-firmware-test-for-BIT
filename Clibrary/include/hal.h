@@ -176,7 +176,6 @@ void pos_init(void);
 void update_accel_gyro_data(void);
 void update_mag_data(void);
 void update_baro_alt(void);
-bool gyro_calibrate(void);
 void ahrs_update(void);
 void gnss_update(void);
 bool uwb_init(void);

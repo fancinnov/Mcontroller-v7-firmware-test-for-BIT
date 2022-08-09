@@ -182,7 +182,7 @@ void mode_poshold(void){
 					ned_target_pos=location_3d_diff_NED(get_gnss_origin_pos(), gnss_target_pos)*100;//cm
 					ned_dis_2d.x=ned_target_pos.x-get_pos_x();
 					ned_dis_2d.y=ned_target_pos.y-get_pos_y();
-					if(ned_dis_2d.length()<100){//距离目标点小于1m认为到达
+					if(ned_dis_2d.length()<200){//距离目标点小于2m认为到达
 						target_point++;
 					}else{
 						if(ned_dis_2d.y>=0){

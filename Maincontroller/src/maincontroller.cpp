@@ -1600,6 +1600,7 @@ bool gyro_calibrate(void){
 		gyro_sum.zero();
 		accel_start = accel_filt;
 		for (i=0; i<100; i++) {
+			update_accel_gyro_data();
 			gyro_sum += gyro;
 			osDelay(5);
 		}
@@ -1666,8 +1667,8 @@ void update_mag_data(void){
 
 	mag_correct=mag+param->mag_offsets.value;
 
-	if((!is_equal(param->mag_offsets.value.x,0.0f))&&(!is_equal(param->mag_offsets.value.y,0.0f))&&(!is_equal(param->mag_offsets.value.z,0.0f))){
-		mag_corrected=true;
+	if(is_equal(param->mag_offsets.value.x,0.0f)||is_equal(param->mag_offsets.value.y,0.0f)||is_equal(param->mag_offsets.value.z,0.0f)){
+		return;
 	}
 
 	if(!initial_mag){
@@ -1676,6 +1677,7 @@ void update_mag_data(void){
 		initial_mag=true;
 	}else{
 		mag_filt = _mag_filter.apply(mag_correct);
+		mag_corrected=true;
 	}
 }
 
@@ -1754,6 +1756,7 @@ void ahrs_update(void){
 		cos_yaw=cosf(yaw_rad);
 		sin_yaw=sinf(yaw_rad);
 		ahrs_healthy=true;
+		mag_corrected=false;
 	}
 	if(mag_correcting&&initial_mag){
 		compass_calibrate();
@@ -2798,6 +2801,7 @@ void debug(void){
 //	usb_printf("accelx:%f,accely:%f,accelz:%f\n",accel_correct.x,accel_correct.y,accel_correct.z);
 //	usb_printf("accelx:%f,accely:%f,accelz:%f\n ",accel_filt.x,accel_filt.y,accel_filt.z);
 //	usb_printf("accelx:%f,accely:%f,accelz:%f\n ",accel_ef.x,accel_ef.y,accel_ef.z);
+//	usb_printf("x:%f,y:%f,z:%f\n",gyro_offset.x,gyro_offset.y,gyro_offset.z);
 //	usb_printf("ax:%f, ay:%f, az:%f, accelx:%f,accely:%f,accelz:%f\n ",dcm_matrix.a.x, dcm_matrix.a.y, dcm_matrix.a.z, accel_filt.x,accel_filt.y,accel_filt.z);
 //	usb_printf("ax:%f,ay:%f,az:%f\n",mpu9250_data.accf.x,mpu9250_data.accf.y,mpu9250_data.accf.z);
 //	usb_printf("%f,%f,%f\n",mpu9250_data.gyrof.x, mpu9250_data.gyrof.y, mpu9250_data.gyrof.z);

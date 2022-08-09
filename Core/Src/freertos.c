@@ -313,7 +313,6 @@ void InitTask(void *argument)
   IMU_Init();
   MAG_Init();
   while(BARO_Init());
-  gyro_calibrate();
   motors_init();
   attitude_init();
   pos_init();
