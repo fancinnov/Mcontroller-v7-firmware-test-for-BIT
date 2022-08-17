@@ -4,7 +4,7 @@
  *  Created on: 2022年6月18日
  *      Author: 10427
  */
-#include"maincontroller.h"
+#include "maincontroller.h"
 
 //Q表示观测数据的方差；R1表示预测数据的位置的方差；R2表示预测数据速度的方差
 EKF_Baro *ekf_baro_1=new EKF_Baro(_dt, 0.0016, 0.000016, 0.000016);

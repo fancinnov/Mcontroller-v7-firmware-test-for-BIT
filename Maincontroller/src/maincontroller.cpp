@@ -57,7 +57,6 @@ static float uwb_pos_filt_hz=5;//HZ
 static float odom_pos_filt_hz=5;//HZ
 static float odom_vel_filt_hz=5;//HZ
 static float rangefinder_filt_hz=5;//HZ
-static float pitch_rad_raw=0 , roll_rad_raw=0 , yaw_rad_raw=0;
 static float pitch_rad=0 , roll_rad=0 , yaw_rad=0;
 static float pitch_deg=0 , roll_deg=0 , yaw_deg=0;
 static float cos_roll=0, cos_pitch=0, cos_yaw=0, sin_roll=0, sin_pitch=0, sin_yaw=0;
@@ -157,7 +156,6 @@ float get_odom_x(void){return odom_3d.x;}
 float get_odom_y(void){return odom_3d.y;}
 float get_odom_z(void){return odom_3d.z;}
 float get_yaw_map(void){return yaw_map;}
-bool get_mav_yaw_state(void){return get_mav_yaw;}
 bool get_gnss_location_state(void){return get_gnss_location;}
 
 float get_mav_x_target(void){return mav_x_target;}
@@ -173,6 +171,7 @@ void update_dataflash(void){
 	uint16_t addr_num_max=dataflash->get_addr_num_max();
 	if(addr_num_max>1000){
 		dataflash->reset_addr_num_max();
+		addr_num_max=dataflash->get_addr_num_max();
 	}
 	if(addr_num_max<=0){
 		dataflash->set_param_float(param->acro_y_expo.num, param->acro_y_expo.value);
@@ -1021,10 +1020,6 @@ void send_mavlink_heartbeat_data(void){
 			mavlink_send_buffer(MAVLINK_COMM_4, &msg_battery_status);
 		}
 	}
-	if(get_mav_yaw&&((HAL_GetTick()-time_last_attitude)>1000)){
-		//外接机载电脑连上又断了
-		get_mav_yaw=false;
-	}
 }
 
 void send_mavlink_mission_ack(mavlink_channel_t chan, MAV_MISSION_RESULT result){
@@ -1714,8 +1709,8 @@ void ahrs_update(void){
 
 	if(horizon_correct){
 		horizon_correct_flag++;
-		roll_sum+=roll_rad_raw;
-		pitch_sum+=pitch_rad_raw;
+		roll_sum+=roll_rad;
+		pitch_sum+=pitch_rad;
 		if(horizon_correct_flag==100){
 			param->horizontal_correct.value.x=-roll_sum/100;
 			param->horizontal_correct.value.y=-pitch_sum/100;
@@ -1731,12 +1726,7 @@ void ahrs_update(void){
 	}
 
 	if(ahrs_stage_compass){
-		ahrs->update(USE_MAG&&mag_corrected, get_mav_yaw);
-		//由ahrs的四元数推出欧拉姿态角
-		roll_rad_raw = ahrs->quaternion2.get_euler_roll();
-		pitch_rad_raw =ahrs->quaternion2.get_euler_pitch();
-		yaw_rad_raw = ahrs->quaternion2.get_euler_yaw();
-
+		ahrs->update(USE_MAG, mag_corrected, get_mav_yaw);
 		//由ahrs的四元数推出旋转矩阵用于控制
 		ahrs->quaternion2.rotation_matrix(dcm_matrix);
 		dcm_matrix.normalize();
@@ -1756,7 +1746,6 @@ void ahrs_update(void){
 		cos_yaw=cosf(yaw_rad);
 		sin_yaw=sinf(yaw_rad);
 		ahrs_healthy=true;
-		mag_corrected=false;
 	}
 	if(mag_correcting&&initial_mag){
 		compass_calibrate();
@@ -1788,7 +1777,6 @@ void update_baro_alt(void){
 		initial_baro=true;
 	}else{
 		baro_alt-=baro_alt_init;
-		baro_alt=baro_alt_filt+constrain_float((baro_alt-baro_alt_filt), -25.0f, 25.0f);
 		if(get_gps_state()){
 			Vector2f vel_2d(get_vel_x()*0.01,get_vel_y()*0.01);// cm/s->m/s
 			float vel=vel_2d.length();
@@ -1802,6 +1790,9 @@ void update_baro_alt(void){
 				baro_filt_hz=0.3;
 			}else{
 				baro_filt_hz=0.5;
+			}
+			if(vel>2.0f&&abs(get_vel_z())<100.0f){
+				baro_alt=baro_alt_filt+constrain_float((baro_alt-baro_alt_filt), -25.0f, 25.0f);
 			}
 		}else{
 			//TODO:add other sensor correct

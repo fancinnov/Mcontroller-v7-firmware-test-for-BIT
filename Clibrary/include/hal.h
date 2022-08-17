@@ -25,6 +25,7 @@
 #include "cmsis_os.h"
 #include "fatfs.h"
 #include "usart.h"
+#include "fdcan.h"
 #include "adc.h"
 #include "spi.h"
 #include "rtc.h"
@@ -299,6 +300,15 @@ HAL_StatusTypeDef SPI_Transmit_IT(uint8_t *pData, uint16_t Size);
 HAL_StatusTypeDef SPI_Receive_IT(uint8_t *pData, uint16_t Size);
 HAL_StatusTypeDef SPI_TransmitReceive_IT(uint8_t *pTxData, uint8_t *pRxData, uint16_t Size);
 HAL_SPI_StateTypeDef SPI_GetState(void);
+
+//fdcan驱动
+extern FDCAN_RxHeaderTypeDef *fdcanRxHeader;
+extern FDCAN_TxHeaderTypeDef *fdcanTxHeader;
+extern uint8_t *fdcanRxData;
+extern uint8_t *fdcanTxData;
+void set_comm3_as_fdcan(void);//调用该函数后, 串口3被配置为fdcan接口, t3作为can tx, r3作为can rx, 配置的参数可以在Core/Src/fdcan.c文件中修改
+uint32_t get_fdcan_notification(void);//获取fdcan累计接收到的消息包总数,每接收到一条消息包,该函数返回值自动加1;
+void fdcan_send_data(void);//发送fdcan消息包;
 
 //IMU驱动
 void IMU_Init(void);
