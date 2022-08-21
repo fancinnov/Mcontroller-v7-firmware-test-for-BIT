@@ -39,7 +39,7 @@
 #define RC_INPUT_SBUS	1  			//SBUS信号
 
 //配置遥控通道数
-#define RC_INPUT_CHANNELS  	8       //8 RC input channel (value:1000~2000)
+#define RC_INPUT_CHANNELS  	14       //14 RC input channel (value:1000~2000)
 
 //遥控器输入脉宽有效值范围
 #define RC_INPUT_MIN 	1000.0f // 脉宽 1000us

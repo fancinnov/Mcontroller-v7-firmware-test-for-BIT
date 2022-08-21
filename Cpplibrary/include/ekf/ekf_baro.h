@@ -44,7 +44,7 @@ private:
 	float* error1;
 	float* error2;
 	float* Kal;
-	float accelz_filt_hz=2;//Hz 震动对于速度预测影响非常大 所以要把截止频率设低一些
+	float accelz_filt_hz=10;//Hz 震动对于速度预测影响非常大 所以要把截止频率设低一些
 	float accelz_filt=0;
 };
 #endif /* INCLUDE_EKF_EKF_BARO_H_ */

@@ -302,6 +302,7 @@ HAL_StatusTypeDef SPI_TransmitReceive_IT(uint8_t *pTxData, uint8_t *pRxData, uin
 HAL_SPI_StateTypeDef SPI_GetState(void);
 
 //fdcan驱动
+extern FDCAN_FilterTypeDef *fdcanFilterConfig;
 extern FDCAN_RxHeaderTypeDef *fdcanRxHeader;
 extern FDCAN_TxHeaderTypeDef *fdcanTxHeader;
 extern uint8_t *fdcanRxData;
@@ -309,6 +310,7 @@ extern uint8_t *fdcanTxData;
 void set_comm3_as_fdcan(void);//调用该函数后, 串口3被配置为fdcan接口, t3作为can tx, r3作为can rx, 配置的参数可以在Core/Src/fdcan.c文件中修改
 uint32_t get_fdcan_notification(void);//获取fdcan累计接收到的消息包总数,每接收到一条消息包,该函数返回值自动加1;
 void fdcan_send_data(void);//发送fdcan消息包;
+HAL_FDCAN_StateTypeDef get_fdcan_state(void);//获取fdcan状态
 
 //IMU驱动
 void IMU_Init(void);
@@ -647,7 +649,7 @@ extern uint16_t *mav_channels_in;
 //初始化wifi模组
 void wifi_init(void);
 
-//设置8个通道的遥控器信号（系统已经调用过了，一般情况下无需再次调用）
+//设置14个通道的遥控器信号（系统已经调用过了，一般情况下无需再次调用）
 //@range: _channel_roll/_channel_pitch/_channel_yaw:-1.0~1.0; _channel_throttle:0~1.0;
 void set_channel_roll(float roll);
 void set_channel_pitch(float pitch);
@@ -657,8 +659,14 @@ void set_channel_5(float value); //range: 0~1
 void set_channel_6(float value); //range: 0~1
 void set_channel_7(float value); //range: 0~1
 void set_channel_8(float value); //range: 0~1
+void set_channel_9(float value); //range: 0~1
+void set_channel_10(float value); //range: 0~1
+void set_channel_11(float value); //range: 0~1
+void set_channel_12(float value); //range: 0~1
+void set_channel_13(float value); //range: 0~1
+void set_channel_14(float value); //range: 0~1
 
-//获取8个通道的遥控原生信号脉宽（1000~2000,单位：us）
+//获取14个通道的遥控原生信号脉宽（1000~2000,单位：us）
 uint16_t input_channel_roll(void);
 uint16_t input_channel_pitch(void);
 uint16_t input_channel_yaw(void);
@@ -667,7 +675,13 @@ uint16_t input_channel_5(void);
 uint16_t input_channel_6(void);
 uint16_t input_channel_7(void);
 uint16_t input_channel_8(void);
-//获取解析后的8个通道遥控数据
+uint16_t input_channel_9(void);
+uint16_t input_channel_10(void);
+uint16_t input_channel_11(void);
+uint16_t input_channel_12(void);
+uint16_t input_channel_13(void);
+uint16_t input_channel_14(void);
+//获取解析后的14个通道遥控数据
 float get_channel_roll(void);		//滚转通道，range: -1~1
 float get_channel_pitch(void);		//俯仰通道，range: -1~1
 float get_channel_yaw(void);		//偏航通道，range: -1~1
@@ -676,6 +690,12 @@ float get_channel_5(void); 			//5通道，range: 0~1
 float get_channel_6(void); 			//6通道，range: 0~1
 float get_channel_7(void); 			//7通道，range: 0~1
 float get_channel_8(void); 			//8通道，range: 0~1
+float get_channel_9(void); 			//9通道，range: 0~1
+float get_channel_10(void); 		//10通道，range: 0~1
+float get_channel_11(void); 		//11通道，range: 0~1
+float get_channel_12(void); 		//12通道，range: 0~1
+float get_channel_13(void); 		//13通道，range: 0~1
+float get_channel_14(void); 		//14通道，range: 0~1
 
 /* *************************************************
  * ****************Dev code begin*******************/

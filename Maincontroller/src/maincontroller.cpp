@@ -53,6 +53,7 @@ static float gyro_filt_hz=20;//HZ
 static float mag_filt_hz=5;//HZ
 static float baro_filt_hz=0.5;//HZ
 static float accel_ef_filt_hz=10;//HZ
+static float theta_filt_hz=20;//HZ
 static float uwb_pos_filt_hz=5;//HZ
 static float odom_pos_filt_hz=5;//HZ
 static float odom_vel_filt_hz=5;//HZ
@@ -75,7 +76,7 @@ static Location gnss_origin_pos, gnss_current_pos;
 static Vector3f ned_current_pos, ned_current_vel;
 static Matrix3f dcm_matrix, dcm_matrix_correct;										//旋转矩阵
 static LowPassFilter2pVector3f	_accel_filter, _gyro_filter, _accel_ef_filter;
-static LowPassFilterFloat _baro_alt_filter;
+static LowPassFilterFloat _baro_alt_filter,_theta_filter;
 static LowPassFilterVector3f _mag_filter, _uwb_pos_filter;
 static LowPassFilterVector2f _odom_vel_filter, _odom_pos_filter;
 
@@ -1485,6 +1486,7 @@ void update_accel_gyro_data(void){
 			_accel_filter.set_cutoff_frequency(400, accel_filt_hz);
 			_gyro_filter.set_cutoff_frequency(400, gyro_filt_hz);
 			_accel_ef_filter.set_cutoff_frequency(400, accel_ef_filt_hz);
+			_theta_filter.set_cutoff_frequency(400, theta_filt_hz);
 			ahrs_stage_compass=true;
 		}
 	}else{
@@ -1733,6 +1735,9 @@ void ahrs_update(void){
 		attitude->set_rotation_body_to_ned(dcm_matrix);
 		gyro_ef=dcm_matrix*gyro_filt;
 		accel_ef=dcm_matrix*accel_filt;
+		Vector2f accel_2d(accel_ef.x,accel_ef.y);
+		float theta=asinf(accel_2d.length()/GRAVITY_MSS);
+		accel_ef.z*=cosf(_theta_filter.apply(theta));
 		accel_ef=_accel_ef_filter.apply(accel_ef);
 
 		dcm_matrix.to_euler(&roll_rad, &pitch_rad, &yaw_rad);
@@ -2763,7 +2768,7 @@ void Logger_Update(void){
  * *******************code for test and debug*********************
  *****************************************************************/
 void debug(void){
-//	usb_printf("l:%d\n",get_comm3_available());
+//	usb_printf("l:%d\n",get_fdcan_notification());
 //	usb_printf("ux:%f|uy:%f|uz:%f|x:%f|y:%f|vx:%f|vy:%f\n", uwb->uwb_position.x, uwb->uwb_position.y,  uwb->uwb_position.z, get_pos_x(), get_pos_y(),get_vel_x(), get_vel_y());
 //	usb_printf("gps_position lat:%lf ,lon:%lf ,alt:%lf \r\n" , (double)gps_position->lat/10000000.0,(double)gps_position->lon/10000000.0,(double)gps_position->alt/1000000.0);
 //	usb_printf("l:%d|%d|%d\n",*(__IO uint8_t*)((uint32_t)0x081D0000),*(__IO uint8_t*)((uint32_t)0x081D0001),*(__IO uint8_t*)((uint32_t)0x081D0002));
@@ -2806,7 +2811,7 @@ void debug(void){
 //	usb_printf("pos_z:%f|%f|%f|%f\n",spl06_data.baro_alt,get_pos_z(),get_vel_z(),accel_ef.z);
 //	usb_printf("speed:%f\n",param->auto_land_speed.value);
 //	usb_printf("z:%f\n",attitude->get_angle_roll_p().kP());
-//	usb_printf("r:%f,p:%f,y:%f,t:%f,5:%f,6:%f,7:%f,8:%f\n",get_channel_roll(),get_channel_pitch(),get_channel_yaw(), get_channel_throttle(),get_channel_5(),get_channel_6(),get_channel_7(),get_channel_8());
+//	usb_printf("r:%f,p:%f,y:%f,t:%f,5:%f,6:%f,7:%f,8:%f\n",get_channel_roll(),get_channel_pitch(),get_channel_yaw(), get_channel_throttle(),get_channel_9(),get_channel_10(),get_channel_11(),get_channel_12());
 //	usb_printf("0:%f,1:%f,4:%f,5:%f\n",motors->get_thrust_rpyt_out(0),motors->get_thrust_rpyt_out(1),motors->get_thrust_rpyt_out(4), motors->get_thrust_rpyt_out(5));
 //	usb_printf("roll:%f,pitch:%f,yaw:%f,throttle:%f\n",motors->get_roll(),motors->get_pitch(),motors->get_yaw(), motors->get_throttle());
 //	usb_printf("yaw:%f,yaw_throttle:%f\n",yaw_deg,motors->get_yaw());
