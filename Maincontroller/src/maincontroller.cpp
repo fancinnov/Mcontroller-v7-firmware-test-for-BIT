@@ -83,7 +83,7 @@ static LowPassFilterVector2f _odom_vel_filter, _odom_pos_filter;
 parameter *param=new parameter();
 ap_t *ap=new ap_t();
 AHRS *ahrs=new AHRS(_dt);
-EKF_Baro *ekf_baro=new EKF_Baro(_dt, 0.0016, 0.000016, 0.000016);
+EKF_Baro *ekf_baro=new EKF_Baro(_dt, 0.0016, 1.0, 0.000016, 0.000016);
 EKF_Rangefinder *ekf_rangefinder=new EKF_Rangefinder(_dt, 1.0, 0.000016, 0.16);
 EKF_Odometry *ekf_odometry=new EKF_Odometry(_dt, 0.0016, 0.0016, 0.000016, 0.00016, 0.000016, 0.00016);
 EKF_GNSS *ekf_gnss=new EKF_GNSS(_dt, 0.0016, 0.0016, 0.0016, 0.0016, 0.000016, 0.00016, 0.000016, 0.00016);
@@ -1736,8 +1736,8 @@ void ahrs_update(void){
 		gyro_ef=dcm_matrix*gyro_filt;
 		accel_ef=dcm_matrix*accel_filt;
 		Vector2f accel_2d(accel_ef.x,accel_ef.y);
-		float theta=asinf(accel_2d.length()/GRAVITY_MSS);
-		accel_ef.z*=cosf(_theta_filter.apply(theta));
+//		float theta=atan2f(accel_2d.length(), GRAVITY_MSS);
+		accel_ef.z+=accel_2d.length_squared()/accel_ef.length()/3;
 		accel_ef=_accel_ef_filter.apply(accel_ef);
 
 		dcm_matrix.to_euler(&roll_rad, &pitch_rad, &yaw_rad);

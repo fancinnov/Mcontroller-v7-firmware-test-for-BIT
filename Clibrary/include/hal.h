@@ -303,10 +303,11 @@ HAL_SPI_StateTypeDef SPI_GetState(void);
 
 //fdcan驱动
 extern FDCAN_FilterTypeDef *fdcanFilterConfig;
-extern FDCAN_RxHeaderTypeDef *fdcanRxHeader;
 extern FDCAN_TxHeaderTypeDef *fdcanTxHeader;
-extern uint8_t *fdcanRxData;
 extern uint8_t *fdcanTxData;
+FDCAN_RxHeaderTypeDef *get_fdcanRxHeader_prt(uint8_t buffer_num);//buffer_num取值范围0~15
+uint8_t *get_fdcanRxData_prt(uint8_t buffer_num);//buffer_num取值范围0~15
+void set_fdcan_recieve_multifold(uint8_t num);//设置can总线多倍接收,开辟多个缓存区,用于can总线接收数据频率高于处理频率的情况,num取值范围1~16,即最高开辟16个缓存区
 void set_comm3_as_fdcan(void);//调用该函数后, 串口3被配置为fdcan接口, t3作为can tx, r3作为can rx, 配置的参数可以在Core/Src/fdcan.c文件中修改
 uint32_t get_fdcan_notification(void);//获取fdcan累计接收到的消息包总数,每接收到一条消息包,该函数返回值自动加1;
 void fdcan_send_data(void);//发送fdcan消息包;
@@ -324,6 +325,7 @@ void MAG_Get_Data(void);
 uint8_t BARO_Init(void);
 void BARO_Get_Date(void);
 void Baro_set_press_offset(float vel); //速度单位:m/s
+void reset_sensors(void);
 
 /***fram驱动函数为底层驱动，它的上层函数在Cpplibrary中的flash.h***/
 void FRAM_Init(void);//FRAM 初始化
@@ -365,6 +367,7 @@ void sd_log_close(void);
 
 /****serial port and usb port****/
 void reset_usb(void);
+void check_usb_reset(void);
 extern uint8_t COMM_0, COMM_1, COMM_2, COMM_3, COMM_4;
 /***************usb+串口配置****************
  * *************comm0:USB口***************

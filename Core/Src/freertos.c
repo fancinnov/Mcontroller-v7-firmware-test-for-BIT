@@ -642,12 +642,6 @@ void MagTask(void *argument)
 
 /* ****************Dev code end*********************
  * *************************************************/
-static bool usb_reset=false;
-void USB_State_IRQHandler(PCD_HandleTypeDef *hpcd){
-	if((hpcd->Instance->GOTGINT & USB_OTG_GOTGINT_SEDET) == USB_OTG_GOTGINT_SEDET){
-		usb_reset=true;
-	}
-}
 /// (5) define task function that step(3) declared
 void IdleTask(void *argument){
 	while(!initialed_task){
@@ -656,10 +650,7 @@ void IdleTask(void *argument){
 //	TaskStatus_t taskstatus;		// NOTED: add codes that don't need to loop
 	for(;;)							// NOTED: if codes need to loop, must add into for(;;){} or while(1){} or some other looper.
 	{
-	  if(usb_reset){
-		  reset_usb();
-		  usb_reset=false;
-	  }
+	  check_usb_reset();
 	  debug();
 //	  vTaskGetInfo(sdLogTaskHandle, &taskstatus, pdTRUE, eInvalid);
 //	  usb_printf("freeHeapSize:%d, freeStackSize:%d\n", xPortGetFreeHeapSize(),taskstatus.usStackHighWaterMark);
