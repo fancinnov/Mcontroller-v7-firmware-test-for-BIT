@@ -1749,7 +1749,7 @@ void ahrs_update(void){
 		sin_yaw=sinf(yaw_rad);
 		ahrs_healthy=true;
 	}
-	if(mag_correcting&&initial_mag){
+	if(USE_MAG&&mag_correcting){
 		compass_calibrate();
 		ahrs_healthy=false;
 	}
