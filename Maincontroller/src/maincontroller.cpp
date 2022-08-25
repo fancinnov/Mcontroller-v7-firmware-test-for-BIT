@@ -53,7 +53,6 @@ static float gyro_filt_hz=20;//HZ
 static float mag_filt_hz=5;//HZ
 static float baro_filt_hz=0.5;//HZ
 static float accel_ef_filt_hz=10;//HZ
-static float theta_filt_hz=20;//HZ
 static float uwb_pos_filt_hz=5;//HZ
 static float odom_pos_filt_hz=5;//HZ
 static float odom_vel_filt_hz=5;//HZ
@@ -76,7 +75,7 @@ static Location gnss_origin_pos, gnss_current_pos;
 static Vector3f ned_current_pos, ned_current_vel;
 static Matrix3f dcm_matrix, dcm_matrix_correct;										//旋转矩阵
 static LowPassFilter2pVector3f	_accel_filter, _gyro_filter, _accel_ef_filter;
-static LowPassFilterFloat _baro_alt_filter,_theta_filter;
+static LowPassFilterFloat _baro_alt_filter;
 static LowPassFilterVector3f _mag_filter, _uwb_pos_filter;
 static LowPassFilterVector2f _odom_vel_filter, _odom_pos_filter;
 
@@ -1486,7 +1485,6 @@ void update_accel_gyro_data(void){
 			_accel_filter.set_cutoff_frequency(400, accel_filt_hz);
 			_gyro_filter.set_cutoff_frequency(400, gyro_filt_hz);
 			_accel_ef_filter.set_cutoff_frequency(400, accel_ef_filt_hz);
-			_theta_filter.set_cutoff_frequency(400, theta_filt_hz);
 			ahrs_stage_compass=true;
 		}
 	}else{
@@ -1736,8 +1734,7 @@ void ahrs_update(void){
 		gyro_ef=dcm_matrix*gyro_filt;
 		accel_ef=dcm_matrix*accel_filt;
 		Vector2f accel_2d(accel_ef.x,accel_ef.y);
-//		float theta=atan2f(accel_2d.length(), GRAVITY_MSS);
-		accel_ef.z+=accel_2d.length_squared()/accel_ef.length()/3;
+		accel_ef.z+=0.4*accel_2d.length_squared()/accel_ef.length();
 		accel_ef=_accel_ef_filter.apply(accel_ef);
 
 		dcm_matrix.to_euler(&roll_rad, &pitch_rad, &yaw_rad);
