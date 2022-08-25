@@ -35,7 +35,7 @@ void fdcan_update(void){//以自己需要的频率循环运行即可
 	if(get_fdcan_notification()!=notify){
 		notify=get_fdcan_notification();
 		//获取接收到的can header,本demo直接打印了header中的id.由于开辟了两个接收缓存,所以调用的时候需要指明缓存编号为0和1
-		usb_printf("id:%x|%x\n",get_fdcanRxHeader_prt(0)->Identifier, get_fdcanRxHeader_prt(1)->Identifier);
+		usb_printf("id:%x|%x|%d\n",get_fdcanRxHeader_prt(0)->Identifier, get_fdcanRxHeader_prt(1)->Identifier, notify);
 		//获取接收到的can data,打印了缓存0接收的8字节数据
 		usb_printf("data:%d|%d|%d|%d|%d|%d|%d|%d\n",get_fdcanRxData_prt(0)[0],get_fdcanRxData_prt(0)[1],get_fdcanRxData_prt(0)[2],get_fdcanRxData_prt(0)[3],get_fdcanRxData_prt(0)[4],get_fdcanRxData_prt(0)[5],get_fdcanRxData_prt(0)[6],get_fdcanRxData_prt(0)[7]);
 		//获取接收到的can data,打印了缓存1接收的8字节数据
