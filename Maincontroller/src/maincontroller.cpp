@@ -51,7 +51,7 @@ static bool rc_channels_sendback=false;
 static float accel_filt_hz=10;//HZ
 static float gyro_filt_hz=20;//HZ
 static float mag_filt_hz=5;//HZ
-static float baro_filt_hz=0.5;//HZ
+static float baro_filt_hz=2;//HZ
 static float accel_ef_filt_hz=10;//HZ
 static float uwb_pos_filt_hz=5;//HZ
 static float odom_pos_filt_hz=5;//HZ
@@ -1351,6 +1351,16 @@ void rc_range_init(void){
 	rc_range_max[1]=(float)param->channel_range.channel[5];
 	rc_range_max[2]=(float)param->channel_range.channel[6];
 	rc_range_max[3]=(float)param->channel_range.channel[7];
+	for(uint8_t i=0;i<4;i++){
+		if(rc_range_min[i]<1000||rc_range_min[i]>1100){
+			rc_range_min[i]=1100;
+		}
+	}
+	for(uint8_t i=0;i<4;i++){
+		if(rc_range_max[i]<1900||rc_range_max[i]>2000){
+			rc_range_max[i]=1900;
+		}
+	}
 	rc_range_cal();
 }
 
@@ -1733,8 +1743,6 @@ void ahrs_update(void){
 		attitude->set_rotation_body_to_ned(dcm_matrix);
 		gyro_ef=dcm_matrix*gyro_filt;
 		accel_ef=dcm_matrix*accel_filt;
-		Vector2f accel_2d(accel_ef.x,accel_ef.y);
-		accel_ef.z+=0.4*accel_2d.length_squared()/accel_ef.length();
 		accel_ef=_accel_ef_filter.apply(accel_ef);
 
 		dcm_matrix.to_euler(&roll_rad, &pitch_rad, &yaw_rad);
@@ -1755,8 +1763,10 @@ void ahrs_update(void){
 	}
 }
 
-static float baro_alt_filt=0,baro_alt_init=0;
+static float baro_alt_filt=0,baro_alt_init=0,baro_alt_last=0,baro_alt_correct=0,gnss_alt_last=0;
+static float gnss_alt_delta=0,baro_alt_delta=0;
 static uint16_t init_baro=0;
+static float K_gain=0.0f;
 void update_baro_alt(void){
 	if(init_baro<20){//前20点不要
 		init_baro++;
@@ -1780,28 +1790,22 @@ void update_baro_alt(void){
 	}else{
 		baro_alt-=baro_alt_init;
 		if(get_gps_state()){
+			K_gain=constrain_float(gps_position->satellites_used/30, 0.0f, 0.8f);
+			gnss_alt_delta=(float)gnss_current_pos.alt-gnss_alt_last;
+			gnss_alt_last=(float)gnss_current_pos.alt;
 			Vector2f vel_2d(get_vel_x()*0.01,get_vel_y()*0.01);// cm/s->m/s
 			float vel=vel_2d.length();
-			if(vel>5.0f){
-				baro_filt_hz=0.05;
-			}else if(vel>3.0f){
-				baro_filt_hz=0.1;
-			}else if(vel>2.0f){
-				baro_filt_hz=0.15;
-			}else if(vel>1.0f){
-				baro_filt_hz=0.3;
-			}else{
-				baro_filt_hz=0.5;
-			}
 			if(vel>2.0f&&abs(get_vel_z())<100.0f){
-				baro_alt=baro_alt_filt+constrain_float((baro_alt-baro_alt_filt), -25.0f, 25.0f);
+				baro_alt=baro_alt_filt+constrain_float((baro_alt-baro_alt_filt), -15.0f, 15.0f);
 			}
 		}else{
-			//TODO:add other sensor correct
-			baro_filt_hz=0.5;
+			K_gain=0.0f;
 		}
+		baro_alt_delta=baro_alt-baro_alt_last;
+		baro_alt_last=baro_alt;
+		baro_alt_correct+=((1-K_gain)*baro_alt_delta+K_gain*gnss_alt_delta);
 		_baro_alt_filter.set_cutoff_frequency(10, baro_filt_hz);
-		baro_alt_filt = _baro_alt_filter.apply(baro_alt);
+		baro_alt_filt = _baro_alt_filter.apply(baro_alt_correct);
 		get_baro_alt_filt=true;
 	}
 }
@@ -2805,7 +2809,7 @@ void debug(void){
 //	usb_printf("pitch:%f|roll:%f|yaw:%f\n", pitch_rad, roll_rad, yaw_rad);
 //	usb_printf("vib:%f\n", param->vib_land.value);
 //	s2_printf("x:%f,y:%f\n", x_target, y_target);
-//	usb_printf("pos_z:%f|%f|%f|%f\n",spl06_data.baro_alt,get_pos_z(),get_vel_z(),accel_ef.z);
+//	usb_printf("pos_z:%f|%f|%f|%f\n",get_baroalt_filt(),get_pos_z(),get_vel_z(),accel_ef.z);
 //	usb_printf("speed:%f\n",param->auto_land_speed.value);
 //	usb_printf("z:%f\n",attitude->get_angle_roll_p().kP());
 //	usb_printf("r:%f,p:%f,y:%f,t:%f,5:%f,6:%f,7:%f,8:%f\n",get_channel_roll(),get_channel_pitch(),get_channel_yaw(), get_channel_throttle(),get_channel_9(),get_channel_10(),get_channel_11(),get_channel_12());

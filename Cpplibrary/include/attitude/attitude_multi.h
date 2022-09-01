@@ -15,7 +15,7 @@
 #include "pid/p.h"
 
 #define AC_ATTITUDE_ACCEL_RP_CONTROLLER_MIN_RADSS       radians(40.0f)   // minimum body-frame acceleration limit for the stability controller (for roll and pitch axis)
-#define AC_ATTITUDE_ACCEL_RP_CONTROLLER_MAX_RADSS       radians(1000.0f)  // maximum body-frame acceleration limit for the stability controller (for roll and pitch axis)
+#define AC_ATTITUDE_ACCEL_RP_CONTROLLER_MAX_RADSS       radians(720.0f)  // maximum body-frame acceleration limit for the stability controller (for roll and pitch axis)
 #define AC_ATTITUDE_ACCEL_Y_CONTROLLER_MIN_RADSS        radians(10.0f)   // minimum body-frame acceleration limit for the stability controller (for yaw axis)
 #define AC_ATTITUDE_ACCEL_Y_CONTROLLER_MAX_RADSS        radians(120.0f)  // maximum body-frame acceleration limit for the stability controller (for yaw axis)
 #define AC_ATTITUDE_CONTROL_SLEW_YAW_DEFAULT_DS        45      // constraint on yaw angle error in degrees.  This should lead to maximum turn rate of 10deg/sec * Stab Rate P so by default will be 45deg/sec.
