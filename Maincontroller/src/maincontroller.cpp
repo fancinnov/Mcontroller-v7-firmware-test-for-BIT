@@ -2630,7 +2630,7 @@ void set_throttle_zero_flag(float throttle_control)
     // if not using throttle interlock and non-zero throttle and not E-stopped,
     // or using motor interlock and it's enabled, then motors are running,
     // and we are flying. Immediately set as non-zero
-    if (throttle_control > 0 && motors->get_interlock()) {
+    if (throttle_control > 0.01 && get_soft_armed()) {
         last_nonzero_throttle_ms = tnow_ms;
         ap->throttle_zero = false;
     } else if (tnow_ms - last_nonzero_throttle_ms <= THROTTLE_ZERO_DEBOUNCE_TIME_MS) {
