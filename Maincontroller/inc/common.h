@@ -22,7 +22,7 @@
  * *************************************************/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Attitude and Position Control pid parameters // 已设实际参数用于机臂较短、转动惯量较大的机型, 注释中的默认参数可用于机臂较长、转动惯量较小的机型  //
+// Attitude and Position Control pid parameters // 已设实际参数用于动力较强的机型, 注释中的参数可用于动力适中的机型, 动力越强的机型PID内环越小。  //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define AC_ATTITUDE_CONTROL_ANGLE_ROLL_P                      8.0f             // default angle P gain for roll 4.5f
 #define AC_ATTITUDE_CONTROL_ANGLE_PITCH_P                     8.0f             // default angle P gain for pitch 4.5f

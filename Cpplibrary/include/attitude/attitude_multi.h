@@ -227,6 +227,7 @@ public:
 
 	// Return configured tilt angle limit in degrees
 	float lean_angle_max() const { return _angle_max; }
+	void set_lean_angle_max(float degree){_angle_max=degree;}
 
 	// Proportional controller with piecewise sqrt sections to constrain second derivative
 	static float sqrt_controller(float error, float p, float second_ord_lim, float dt);

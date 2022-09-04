@@ -17,7 +17,7 @@ class AHRS{
 
 public:
 	AHRS(float dt);
-	void update(bool use_mag, bool &get_mag, bool &get_mav_yaw);
+	void update(bool &get_mag, bool &get_mav_yaw);
 	bool is_initialed(void){return initialed;}
 	void reset(void){
 		initialed=false;
@@ -30,9 +30,6 @@ private:
 	float T=0.0025;
 
 	bool initialed=false;
-
-	float yaw_rad_record=0;
-	float mag_correct=0.0f;
 
 	Quaternion quaternion=Quaternion();
 
@@ -54,6 +51,9 @@ private:
 						0, 0, 0.4};
 
 	float ekf_gain;
+
+	Vector2f mag_ef_2d;
+	Vector3f mag_bf;
 
 	Vector3f accel_average, accel_variance;
 	Vector3f accel_array[var_length];

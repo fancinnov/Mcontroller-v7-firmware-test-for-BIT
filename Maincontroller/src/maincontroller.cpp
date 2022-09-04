@@ -575,6 +575,8 @@ void parse_mavlink_data(mavlink_channel_t chan, uint8_t data, mavlink_message_t*
 							pos_control->get_pos_xy_p()(param->pos_xy_p.value);
 							pos_control->get_vel_xy_pid()(param->vel_xy_pid.value_p, param->vel_xy_pid.value_p, param->vel_xy_pid.value_i, param->vel_xy_pid.value_i, param->vel_xy_pid.value_d,
 									param->vel_xy_pid.value_d, param->vel_xy_pid.value_imax, param->vel_xy_pid.value_filt_hz, param->vel_xy_pid.value_filt_d_hz, _dt);
+							attitude->set_lean_angle_max(param->angle_max.value);
+							pos_control->set_lean_angle_max_d(param->angle_max.value);
 							send_mavlink_param_list(chan);
 						}else if(is_equal(cmd.param1,1.0f)){//ANGLE_ROLL_P
 							attitude->get_angle_roll_p().kP(cmd.param2);
@@ -793,6 +795,8 @@ void parse_mavlink_data(mavlink_channel_t chan, uint8_t data, mavlink_message_t*
 							mavlink_send_buffer(chan, &msg_command_long);
 						}else if(is_equal(cmd.param1,18.0f)){
 							param->angle_max.value=cmd.param2;
+							attitude->set_lean_angle_max(param->angle_max.value);
+							pos_control->set_lean_angle_max_d(param->angle_max.value);
 							dataflash->set_param_float(param->angle_max.num, param->angle_max.value);
 							command_long.command=MAV_CMD_DO_SET_PARAMETER;
 							command_long.param1=18.0f;
@@ -1427,6 +1431,7 @@ void attitude_init(void){
 			param->rate_pitch_pid.value_d, param->rate_pitch_pid.value_imax, param->rate_pitch_pid.value_filt_hz, _dt);
 	attitude->get_rate_yaw_pid()(param->rate_yaw_pid.value_p, param->rate_yaw_pid.value_i,
 			param->rate_yaw_pid.value_d, param->rate_yaw_pid.value_imax, param->rate_yaw_pid.value_filt_hz, _dt);
+	attitude->set_lean_angle_max(param->angle_max.value);
 }
 
 void pos_init(void){
@@ -1439,6 +1444,7 @@ void pos_init(void){
 			param->vel_xy_pid.value_d, param->vel_xy_pid.value_imax, param->vel_xy_pid.value_filt_hz, param->vel_xy_pid.value_filt_d_hz, _dt);
 	pos_control->set_dt(_dt);
 	pos_control->init_xy_controller(true);
+	pos_control->set_lean_angle_max_d(param->angle_max.value);
 	sdlog->Logger_Read_Gnss();
 	rangefinder_state.alt_cm_filt.set_cutoff_frequency(100, rangefinder_filt_hz);//tfmini默认频率100hz
 }
@@ -1736,7 +1742,7 @@ void ahrs_update(void){
 	}
 
 	if(ahrs_stage_compass){
-		ahrs->update(USE_MAG, mag_corrected, get_mav_yaw);
+		ahrs->update(mag_corrected, get_mav_yaw);
 		//由ahrs的四元数推出旋转矩阵用于控制
 		ahrs->quaternion2.rotation_matrix(dcm_matrix);
 		dcm_matrix.normalize();
@@ -2789,7 +2795,7 @@ void debug(void){
 //	usb_printf("temp:%f\n",spl06_data.temp);
 //	usb_printf("alt:%f\n",get_rangefinder_alt());
 //	float cos_tilt = ahrs_cos_pitch() * ahrs_cos_roll();
-//	usb_printf("%f|%f|%f\n", pitch_deg, roll_deg, yaw_deg);
+//	usb_printf("%f|%f|%f|%f\n", pitch_deg, roll_deg, yaw_deg, get_accel_filt().length());
 //	usb_printf("l:%f\n",get_mag_filt().length());
 //	usb_printf("v:%f,i:%f\n",get_batt_volt(),get_batt_current());
 //	usb_printf("gx:%f|gy:%f|gz:%f\n", gyro_filt.x, gyro_filt.y, gyro_filt.z);
