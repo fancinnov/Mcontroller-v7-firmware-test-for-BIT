@@ -1799,18 +1799,15 @@ void update_baro_alt(void){
 			K_gain=constrain_float(gps_position->satellites_used/30, 0.0f, 0.8f);
 			gnss_alt_delta=(float)gnss_current_pos.alt-gnss_alt_last;
 			gnss_alt_last=(float)gnss_current_pos.alt;
-			Vector2f vel_2d(get_vel_x()*0.01,get_vel_y()*0.01);// cm/s->m/s
-			float vel=vel_2d.length();
-			if(vel>2.0f&&abs(get_vel_z())<100.0f){
-				baro_alt=baro_alt_filt+constrain_float((baro_alt-baro_alt_filt), -15.0f, 15.0f);
-			}
 		}else{
 			K_gain=0.0f;
 		}
 		baro_alt_delta=baro_alt-baro_alt_last;
+		if(abs(get_vel_z())<100.0f){
+			baro_alt_delta=constrain_float(baro_alt_delta, -15.0f, 15.0f);
+		}
 		baro_alt_last=baro_alt;
 		baro_alt_correct+=((1-K_gain)*baro_alt_delta+K_gain*gnss_alt_delta);
-		_baro_alt_filter.set_cutoff_frequency(10, baro_filt_hz);
 		baro_alt_filt = _baro_alt_filter.apply(baro_alt_correct);
 		get_baro_alt_filt=true;
 	}
@@ -1950,6 +1947,18 @@ float get_vel_y(void){//cm/s
 
 float get_vel_z(void){//cm/s
 	return ekf_baro->vel_z;
+}
+
+void sdled_update(void){
+	if(get_soft_armed()){
+		FMU_LED3_Control(true);
+	}else{
+		FMU_LED3_Control(false);
+	}
+	osDelay(200);
+	if(sdlog->m_Logger_Status!=SDLog::Logger_Record){
+		FMU_LED3_Control(false);
+	}
 }
 
 // get_pilot_desired_heading - transform pilot's yaw input into a
@@ -2390,7 +2399,6 @@ bool arm_motors(void)
     in_arm_motors = false;
     takeoff_time=HAL_GetTick();
     Buzzer_set_ring_type(BUZZER_ARMED);
-    FMU_LED3_Control(true);
 
     // return success
     return true;
@@ -2424,7 +2432,6 @@ void disarm_motors(void)
     sdlog->Logger_Disable();
     takeoff_time=0;
     Buzzer_set_ring_type(BUZZER_DISARM);
-    FMU_LED3_Control(false);
 }
 
 //解锁电机

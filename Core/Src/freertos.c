@@ -458,6 +458,7 @@ void HeartbeatTask(void *argument)
 	  send_mavlink_heartbeat_data();
 	  osDelay(100);
 	  FMU_LED1_Control(false);
+	  sdled_update();
 	  vTaskDelayUntil(&PreviousWakeTime, TimeIncrement);
   }
   /* USER CODE END HeartbeatTask */
