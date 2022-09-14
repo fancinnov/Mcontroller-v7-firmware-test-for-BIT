@@ -326,7 +326,6 @@ void InitTask(void *argument)
 	  Buzzer_set_ring_type(BUZZER_ERROR);
 	  usb_printf("System initialized failed!\r\n");
   }
-  osDelay(1000);
   initialed_task=true;//当初始化未完成时，只运行buzzer task
   set_motors_value();
   set_servos_value();
