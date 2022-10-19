@@ -109,7 +109,7 @@ const osThreadAttr_t buzzerTask_attributes = {
 osThreadId_t sdLogTaskHandle;
 const osThreadAttr_t sdLogTask_attributes = {
   .name = "sdLogTask",
-  .stack_size = 1200 * 4,
+  .stack_size = 1500 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for gnssTask */
