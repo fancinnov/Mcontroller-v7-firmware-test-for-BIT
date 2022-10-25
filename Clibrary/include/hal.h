@@ -200,6 +200,7 @@ void arm_motors_check(void);
 bool mode_init(void);
 void mode_update(void);
 void sdled_update(void);
+void offboard_callback(void);
 void debug(void);
 /****************c/c++ interface*******************************/
 bool get_task_initialed(void);
