@@ -93,6 +93,38 @@
 #define POSCONTROL_VEL_XY_FILT_HZ             5.0f    // horizontal velocity controller input filter default 5.0
 #define POSCONTROL_VEL_XY_FILT_D_HZ           5.0f    // horizontal velocity controller input filter for D default 5.0
 
+//UGV attitude control default definition
+#define AR_ATTCONTROL_STEER_ANG_P       2.50f
+#define AR_ATTCONTROL_STEER_RATE_FF     0.20f
+#define AR_ATTCONTROL_STEER_RATE_P      0.20f
+#define AR_ATTCONTROL_STEER_RATE_I      0.20f
+#define AR_ATTCONTROL_STEER_RATE_IMAX   1.00f
+#define AR_ATTCONTROL_STEER_RATE_D      0.00f
+#define AR_ATTCONTROL_STEER_RATE_FILT   10.00f
+#define AR_ATTCONTROL_STEER_RATE_MAX    360.0f
+#define AR_ATTCONTROL_STEER_ACCEL_MAX   180.0f
+#define AR_ATTCONTROL_THR_SPEED_P       0.20f
+#define AR_ATTCONTROL_THR_SPEED_I       0.20f
+#define AR_ATTCONTROL_THR_SPEED_IMAX    1.00f
+#define AR_ATTCONTROL_THR_SPEED_D       0.00f
+#define AR_ATTCONTROL_THR_SPEED_FILT    10.00f
+#define AR_ATTCONTROL_PITCH_THR_P       1.80f
+#define AR_ATTCONTROL_PITCH_THR_I       1.50f
+#define AR_ATTCONTROL_PITCH_THR_D       0.03f
+#define AR_ATTCONTROL_PITCH_THR_IMAX    1.0f
+#define AR_ATTCONTROL_PITCH_THR_FILT    10.0f
+#define AR_ATTCONTROL_DT                0.02f
+#define AR_ATTCONTROL_TIMEOUT_MS        200
+
+// throttle/speed control maximum acceleration/deceleration (in m/s) (_ACCEL_MAX parameter default)
+#define AR_ATTCONTROL_THR_ACCEL_MAX     2.00f
+
+// minimum speed in m/s
+#define AR_ATTCONTROL_STEER_SPEED_MIN   1.0f
+
+// speed (in m/s) at or below which vehicle is considered stopped (_STOP_SPEED parameter default)
+#define AR_ATTCONTROL_STOP_SPEED_DEFAULT    0.1f
+
 // default parameters
 #ifndef ROLL_PITCH_YAW_INPUT_MAX
  # define ROLL_PITCH_YAW_INPUT_MAX      45.0f        // roll, pitch and yaw input range
@@ -175,6 +207,8 @@
 #define MISSION_VEL_MAX 500.0f		//5m/s
 #define MISSION_ACCEL_MAX 100.0f	//1m/ss
 #define ALT_RETURN	1000.0f			//10m
+#define VOLTAGE_GAIN 1.0f
+#define CURRENT_GAIN 1.0f
 
 bool arm_motors(void);
 void disarm_motors(void);
@@ -234,6 +268,10 @@ float get_pos_z(void);//cm
 float get_vel_x(void);//cm/s
 float get_vel_y(void);//cm/s
 float get_vel_z(void);//cm/s
+float get_uwb_x(void);
+float get_uwb_y(void);
+float get_uwb_z(void);
+uint32_t get_uwb_last_ms(void);
 
 float get_mav_x_target(void);
 float get_mav_y_target(void);
@@ -332,6 +370,16 @@ typedef struct {
 	int8_t glitch_count;
 } Rangefinder_state;
 extern Rangefinder_state rangefinder_state;
+
+typedef struct {
+	bool healthy;
+	float flow_dt;
+	LowPassFilterVector2f vel_filter;
+	Vector2f rads;
+	Vector2f vel;
+	Vector2f pos;
+} Opticalflow_state;
+extern Opticalflow_state opticalflow_state;
 
 typedef enum{
 	none=0,
@@ -735,6 +783,18 @@ typedef struct{
 		dataflash_type type=FLOAT;
 		float value=ALT_RETURN;
 	}alt_return;
+
+	struct voltage_gain{
+		uint16_t num=43;
+		dataflash_type type=FLOAT;
+		float value=VOLTAGE_GAIN;
+	}voltage_gain;
+
+	struct current_gain{
+		uint16_t num=44;
+		dataflash_type type=FLOAT;
+		float value=CURRENT_GAIN;
+	}current_gain;
 
 	/* *************************************************
 	 * ****************Dev code begin*******************/

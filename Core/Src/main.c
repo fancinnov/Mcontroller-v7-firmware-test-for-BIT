@@ -66,7 +66,6 @@ MS5611_Data ms5611_data;
 SPL06_Data spl06_data;
 PWM_Channel pwm_channel;
 uint8_t HeartBeatFlags=0;
-uint8_t COMM_0=DEV_COMM, COMM_1=DEV_COMM, COMM_2=DEV_COMM, COMM_3=DEV_COMM, COMM_4=DEV_COMM;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

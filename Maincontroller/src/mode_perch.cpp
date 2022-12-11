@@ -47,10 +47,13 @@ void mode_perch(void){
 	//desire hover angle
 	float ch7=get_channel_7();
 	if(ch7>=0.7&&ch7<1.0){
-		desire_pitch_rad=45*DEG_TO_RAD;
+		rangefinder_state.enabled=false;
+		desire_pitch_rad=30*DEG_TO_RAD;
 	}else if(ch7>=0.3&&ch7<0.7){
-		desire_pitch_rad=22*DEG_TO_RAD;
+		rangefinder_state.enabled=false;
+		desire_pitch_rad=15*DEG_TO_RAD;
 	}else{
+		rangefinder_state.enabled=true;
 		desire_pitch_rad=0;
 	}
 	Servo_Set_Value(2,SERVO_MID+desire_pitch_rad/M_PI_2*SERVO_PI_2);
@@ -152,9 +155,7 @@ void mode_perch(void){
 		}
 
 		// surface tracking that adjust climb rate using rangefinder
-		if(is_equal(desire_pitch_rad,0.0f)){
-			target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control->get_alt_target(), _dt);
-		}
+		target_climb_rate = get_surface_tracking_climb_rate(target_climb_rate, pos_control->get_alt_target(), _dt);
 
 		// call position controller
 		pos_control->set_alt_target_from_climb_rate_ff(target_climb_rate, _dt, false);

@@ -300,7 +300,7 @@ void InitTask(void *argument)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN InitTask */
   reset_usb();
-  config_comm(MAV_COMM, GPS_COMM, MAV_COMM|MLINK_ESP, TFMINI_COMM, MAV_COMM|MLINK_ESP);
+  config_comm();
   set_s1_baudrate(115200);
   set_s2_baudrate(115200);
   set_s3_baudrate(115200);
@@ -313,6 +313,7 @@ void InitTask(void *argument)
   IMU_Init();
   MAG_Init();
   while(BARO_Init());
+  vl53lxx_init();
   motors_init();
   attitude_init();
   pos_init();
@@ -354,9 +355,9 @@ void Loop400hzTask(void *argument)
 	  ahrs_update();
 	  ekf_baro_alt();
 	  /***Do not change code above and change or add new code below***/
-//	  ekf_rf_alt();
-//	  ekf_odom_xy();
+	  ekf_odom_xy();
 	  ekf_gnss_xy();
+	  ekf_opticalflow_xy();
 	  mode_update();
 	  set_motors_value();
 	  set_servos_value();
@@ -384,6 +385,7 @@ void Loop200hzTask(void *argument)
 	  osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
 	  comm_callback();
 	  usbsend_callback();
+	  vl53lxx_update();
   }
   /* USER CODE END Loop200hzTask */
 }
@@ -431,6 +433,7 @@ void Loop50hzTask(void *argument)
 	  osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
 	  RC_Input_Loop();
 	  adc_update();
+	  opticalflow_update();
 	  uwb_position_update();
   }
   /* USER CODE END Loop50hzTask */
@@ -480,7 +483,8 @@ void MavSendTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  mav_send_data();
+	  distribute_mavlink_data();
+	  comm_send_data();
   }
   /* USER CODE END MavSendTask */
 }
