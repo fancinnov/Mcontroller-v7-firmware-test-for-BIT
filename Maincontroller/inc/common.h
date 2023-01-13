@@ -276,13 +276,20 @@ uint32_t get_uwb_last_ms(void);
 
 float get_mav_x_target(void);
 float get_mav_y_target(void);
+float get_mav_z_target(void);
 float get_mav_vx_target(void);
 float get_mav_vy_target(void);
+float get_mav_vz_target(void);
+float get_mav_ax_target(void);
+float get_mav_ay_target(void);
+float get_mav_az_target(void);
 float get_mav_yaw_target(void);
+float get_mav_yaw_rate_target(void);
 
 float get_vib_value(void);
 float get_vib_angle_z(void);
 bool get_gcs_connected(void);
+bool get_offboard_connected(void);
 bool get_gnss_location_state(void);
 bool has_manual_throttle(void);
 void set_manual_throttle(bool manual_throttle);

@@ -433,7 +433,6 @@ void Loop50hzTask(void *argument)
 	  osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
 	  RC_Input_Loop();
 	  adc_update();
-	  opticalflow_update();
 	  uwb_position_update();
   }
   /* USER CODE END Loop50hzTask */
