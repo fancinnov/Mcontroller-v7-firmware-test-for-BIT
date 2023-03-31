@@ -137,7 +137,7 @@ void mode_poshold(void){
 		get_takeoff_climb_rates(target_climb_rate, takeoff_climb_rate);
 
 		// call attitude controller
-		if(!get_gps_state()){//定位丢失，强制手动
+		if(!get_gnss_state()){//定位丢失，强制手动
 			target_yaw=ahrs_yaw_deg();
 			get_air_resistance_lean_angles(target_roll, target_pitch, DEFAULT_ANGLE_MAX, 1.0f);
 			attitude->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, target_yaw_rate);
@@ -194,7 +194,7 @@ void mode_poshold(void){
 		robot_state=STATE_FLYING;
 		motors->set_desired_spool_state(Motors::DESIRED_THROTTLE_UNLIMITED);
 
-		if(!get_gps_state()){//定位丢失，强制手动
+		if(!get_gnss_state()){//定位丢失，强制手动
 			target_yaw+=target_yaw_rate*_dt;
 			get_air_resistance_lean_angles(target_roll, target_pitch, DEFAULT_ANGLE_MAX, 1.0f);
 			attitude->input_euler_angle_roll_pitch_yaw(target_roll, target_pitch, target_yaw, true);

@@ -202,6 +202,7 @@ void Error_Handler(void);
 #define I2C_EXT_SCL_GPIO_Port GPIOB
 #define PPM_INPUT_Pin GPIO_PIN_9
 #define PPM_INPUT_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

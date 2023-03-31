@@ -110,10 +110,10 @@ extern "C" {
 
 	extern vehicle_gps_position_s *gps_position;
 	extern GnssComm gnss_comm;
-	bool GPS_Init(GnssType type);// type：GNSS模组类型
-	void GPS_Baud_Reset(uint32_t baud);
-	void get_gps_data(uint8_t buf);
-	bool get_gps_state(void);
+	bool Gnss_Init(GnssType type);// type：GNSS模组类型
+	void Gnss_Baud_Reset(uint32_t baud);
+	void get_gnss_data(uint8_t buf);
+	bool get_gnss_state(void);
 
 #ifdef __cplusplus
 }

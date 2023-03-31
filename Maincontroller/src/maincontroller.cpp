@@ -46,10 +46,10 @@ static bool get_opticalflow=false;
 static bool get_rangefinder_data=false;
 static bool get_mav_yaw=false, get_odom_xy=false;
 static bool mag_corrected=false, mag_correcting=false;
-static bool use_uwb_pos_z=false;
 static bool rc_channels_sendback=false;
 static bool gcs_connected=false;
 static bool offboard_connected=false;
+static bool force_autonav=false;
 
 static float accel_filt_hz=20;//HZ
 static float gyro_filt_hz=20;//HZ
@@ -406,12 +406,13 @@ void get_vl53lxx_data(uint16_t distance_mm){
 
 static float flow_alt, flow_bf_x, flow_bf_y;
 static Vector3f flow_gyro_offset;
+static Vector2f flow_rad_last, flow_rad_delta;
 void opticalflow_update(void){
 #if USE_FLOW
 	if(rangefinder_state.alt_healthy){
-		flow_alt=rangefinder_state.alt_cm;
+		flow_alt=constrain_float(rangefinder_state.alt_cm, 0.0f, 100.0f);
 	}else{
-		flow_alt=100.0f;//cm
+		flow_alt=50.0f;//cm
 	}
 	if(lc302_data.quality==245){
 		opticalflow_state.healthy=true;
@@ -421,14 +422,20 @@ void opticalflow_update(void){
 		return;
 	}
 	//光流坐标系->机体坐标系//TODO:add gyro offset
-	flow_bf_x=(float)lc302_data.flow_y_integral/10000.0f-constrain_float(flow_gyro_offset.y/50, -0.1, 0.1);
-	flow_bf_y=-(float)lc302_data.flow_x_integral/10000.0f+constrain_float(flow_gyro_offset.x/50, -0.1, 0.1);
+	flow_bf_x=(float)lc302_data.flow_y_integral/10000.0f-constrain_float(flow_gyro_offset.y/45, -1.0, 1.0);
+	flow_bf_y=-(float)lc302_data.flow_x_integral/10000.0f+constrain_float(flow_gyro_offset.x/45, -1.0, 1.0)-constrain_float(0.1*flow_gyro_offset.z/flow_alt, -1.0, 1.0);
 	//机体坐标系->大地坐标系
 	opticalflow_state.rads.x=flow_bf_x*ahrs_cos_yaw()-flow_bf_y*ahrs_sin_yaw();
 	opticalflow_state.rads.y=flow_bf_x*ahrs_sin_yaw()+flow_bf_y*ahrs_cos_yaw();
+	flow_rad_delta=opticalflow_state.rads-flow_rad_last;
+	if(flow_rad_delta.length()>0.005){
+		opticalflow_state.rads=flow_rad_last+flow_rad_delta.normalized()*0.005;
+	}
+	flow_rad_last=opticalflow_state.rads;
 	opticalflow_state.flow_dt=(float)lc302_data.integration_timespan/1000000.0f;
 	opticalflow_state.vel=opticalflow_state.vel_filter.apply(opticalflow_state.rads*flow_alt/opticalflow_state.flow_dt);
 	opticalflow_state.pos+=opticalflow_state.vel*opticalflow_state.flow_dt;
+//	usb_printf("p:%f|%f,v:%f|%f\n",opticalflow_state.pos.x, opticalflow_state.pos.y, opticalflow_state.vel.x, opticalflow_state.vel.y);
 #endif
 }
 
@@ -453,6 +460,10 @@ static uint32_t motor_test_start_time=0;
 
 uint8_t get_gnss_reset_notify(void){
 	return gnss_reset_notify;
+}
+
+bool get_force_autonav(void){
+	return force_autonav;
 }
 
 //发送
@@ -486,6 +497,11 @@ void parse_mavlink_data(mavlink_channel_t chan, uint8_t data, mavlink_message_t*
 				}
 				if(chan==MAVLINK_COMM_0){
 					offboard_connected=true;
+				}
+				if(msg_received->sysid==254){
+					force_autonav=true;
+				}else{
+					force_autonav=false;
 				}
 				break;
 			case MAVLINK_MSG_ID_SET_MODE:
@@ -1170,7 +1186,9 @@ void parse_mavlink_data(mavlink_channel_t chan, uint8_t data, mavlink_message_t*
 				mavlink_msg_attitude_decode(msg_received, &attitude_mav);
 				yaw_map=wrap_PI(-attitude_mav.yaw);  //slam 算法的map坐标系z轴向上，这里统一改为z轴向下, 所以需要加负号
 				time_last_attitude=HAL_GetTick();
-				get_mav_yaw=true;
+				if(!USE_MAG){
+					get_mav_yaw=true;
+				}
 				break;
 			case MAVLINK_MSG_ID_LOCAL_POSITION_NED_COV:       // MAV ID: 64
 				mavlink_msg_local_position_ned_cov_decode(msg_received, &local_position_ned_cov);
@@ -1220,7 +1238,7 @@ void send_mavlink_heartbeat_data(void){
 	if(sdlog->m_Logger_Status==SDLog::Logger_Record){
 		heartbeat_send.base_mode|=MAV_MODE_FLAG_HIL_ENABLED;
 	}
-	if(get_gps_state()){
+	if(get_gnss_state()){
 		heartbeat_send.base_mode|=MAV_MODE_FLAG_GUIDED_ENABLED;
 	}
 	mavlink_msg_heartbeat_encode(mavlink_system.sysid, mavlink_system.compid, &msg_heartbeat, &heartbeat_send);
@@ -1452,7 +1470,7 @@ void comm1_callback(uint8_t data){
 #if COMM_1==MAV_COMM
 	parse_mavlink_data(MAVLINK_COMM_1, data, &msg_received, &status);
 #elif COMM_1==GPS_COMM
-	get_gps_data(data);
+	get_gnss_data(data);
 #elif COMM_1==TFMINI_COMM
 	get_tfmini_data(data);
 #elif COMM_1==LC302_COMM
@@ -1464,7 +1482,7 @@ void comm2_callback(uint8_t data){
 #if COMM_2==MAV_COMM
 	parse_mavlink_data(MAVLINK_COMM_2, data, &msg_received, &status);
 #elif COMM_2==GPS_COMM
-	get_gps_data(data);
+	get_gnss_data(data);
 #elif COMM_2==TFMINI_COMM
 	get_tfmini_data(data);
 #elif COMM_2==LC302_COMM
@@ -1476,7 +1494,7 @@ void comm3_callback(uint8_t data){
 #if COMM_3==MAV_COMM
 	parse_mavlink_data(MAVLINK_COMM_3, data, &msg_received, &status);
 #elif COMM_3==GPS_COMM
-	get_gps_data(data);
+	get_gnss_data(data);
 #elif COMM_3==TFMINI_COMM
 	get_tfmini_data(data);
 #elif COMM_3==LC302_COMM
@@ -1488,7 +1506,7 @@ void comm4_callback(uint8_t data){
 #if COMM_4==MAV_COMM
 	parse_mavlink_data(MAVLINK_COMM_4, data, &msg_received, &status);
 #elif COMM_4==GPS_COMM
-	get_gps_data(data);
+	get_gnss_data(data);
 #elif COMM_4==TFMINI_COMM
 	get_tfmini_data(data);
 #elif COMM_4==LC302_COMM
@@ -2180,7 +2198,7 @@ void update_baro_alt(void){
 		initial_baro=true;
 	}else{
 		baro_alt-=baro_alt_init;
-		if(get_gps_state()){
+		if(get_gnss_state()){
 			if(is_equal(K_gain, 0.0f)){
 				K_gain=constrain_float((float)gps_position->satellites_used/30, 0.0f, 1.0f);
 				gnss_alt_last=ned_current_pos.z;
@@ -2257,7 +2275,7 @@ static RTC_DateTypeDef sDate;
 static float yaw_gnss_offset=0.0f;
 static uint8_t yaw_gnss_flag=0;
 void gnss_update(void){
-	if(get_gps_state()){
+	if(get_gnss_state()){
 		if(!initial_gnss){
 			gnss_origin_pos.lat=gps_position->lat;//纬度:deg*1e-7
 			gnss_origin_pos.lng=gps_position->lon;//经度:deg*1e-7
@@ -2292,8 +2310,6 @@ void gnss_update(void){
 		ned_current_vel.x=gps_position->vel_n_m_s*100;//cm
 		ned_current_vel.y=gps_position->vel_e_m_s*100;//cm
 		ned_current_vel.z=gps_position->vel_d_m_s*100;//cm
-	}else{
-		initial_gnss=false;
 	}
 }
 
@@ -2347,7 +2363,7 @@ void ekf_opticalflow_xy(void){
 
 void ekf_gnss_xy(void){
 #if USE_GNSS
-	if(!ahrs->is_initialed()||(!ahrs_healthy)||!get_gps_state()){
+	if(!ahrs->is_initialed()||(!ahrs_healthy)||!get_gnss_state()){
 		return;
 	}
 	ekf_gnss->update(get_gnss_location,get_ned_pos_x(),get_ned_pos_y(),get_ned_vel_x(),get_ned_vel_y());
@@ -2466,9 +2482,9 @@ void set_throttle_takeoff(void)
 {
     // tell position controller to reset alt target and reset I terms
     pos_control->init_takeoff();
-    attitude->get_rate_roll_pid().set_integrator(param->rate_pid_integrator.value.x);
-	attitude->get_rate_pitch_pid().set_integrator(param->rate_pid_integrator.value.y);
-	attitude->get_rate_yaw_pid().set_integrator(param->rate_pid_integrator.value.z);
+//    attitude->get_rate_roll_pid().set_integrator(param->rate_pid_integrator.value.x);
+//	attitude->get_rate_pitch_pid().set_integrator(param->rate_pid_integrator.value.y);
+//	attitude->get_rate_yaw_pid().set_integrator(param->rate_pid_integrator.value.z);
 }
 
 float get_throttle_mid(void){
@@ -2554,6 +2570,9 @@ float get_non_takeoff_throttle(void)
 //      returns climb rate (in cm/s) which should be passed to the position controller
 // if use this function, we should set rangefinder_state.alt_healthy=true;
 static float target_rangefinder_alt=0.0f;   // desired altitude in cm above the ground
+void set_target_rangefinder_alt(float alt_target){
+	target_rangefinder_alt=alt_target;
+}
 float get_surface_tracking_climb_rate(float target_rate, float current_alt_target, float dt)
 {
 	if(!rangefinder_state.alt_healthy){
@@ -2692,7 +2711,7 @@ void get_air_resistance_lean_angles(float &roll_d, float &pitch_d, float angle_m
 	pilot_desire_accel.x=-GRAVITY_MSS * tanf(radians(pitch_d));
 	pilot_desire_accel.y = GRAVITY_MSS * tanf(radians(roll_d))/pilot_cos_pitch_target;
 	if(pilot_desire_accel.length()>1.0f){
-		if(get_gps_state()){
+		if(get_gnss_state()){
 			float vel_2d=sqrtf(sq(get_vel_x(),get_vel_y()))/100.0f;
 			angle_limit=angle_max*2.0/3.0/constrain_float(vel_2d*gain/3.0f, 1.0f, 2.0f);
 		}else{
@@ -2732,7 +2751,7 @@ static float _takeoff_start_ms=0;
 static float _takeoff_alt_delta=0;
 
 void set_takeoff(void){
-	if(rc_channels_healthy()&&motors->get_interlock()){
+	if(motors->get_interlock()){
 		robot_state_desired=STATE_TAKEOFF;
 		_takeoff=true;
 	}
@@ -2765,7 +2784,6 @@ void takeoff_start(float alt_cm)
     _takeoff_max_speed = speed;
     _takeoff_start_ms = HAL_GetTick();
     _takeoff_alt_delta = alt_cm;
-    use_uwb_pos_z=false;
 }
 
 bool takeoff_triggered( float target_climb_rate)
@@ -2787,7 +2805,6 @@ void takeoff_stop()
 	_takeoff=false;
 	_takeoff_running = false;
 	_takeoff_start_ms = 0;
-	use_uwb_pos_z=true;
 }
 
 // returns pilot and takeoff climb rates
@@ -2903,14 +2920,6 @@ void disarm_motors(void)
         return;
     }
 
-    if(reset_horizon_integrator&&robot_state==STATE_FLYING){
-		dataflash->set_param_vector3f(param->vel_pid_integrator.num, param->vel_pid_integrator.value);
-		param->rate_pid_integrator.value.x=attitude->get_rate_roll_pid().get_integrator();
-		param->rate_pid_integrator.value.y=attitude->get_rate_pitch_pid().get_integrator();
-		param->rate_pid_integrator.value.z=attitude->get_rate_yaw_pid().get_integrator();
-		dataflash->set_param_vector3f(param->rate_pid_integrator.num, param->rate_pid_integrator.value);
-	}
-
     // we are not in the air
     set_land_complete(true);
 
@@ -2966,7 +2975,7 @@ static void update_land_detector(void)
 {
 	ahrs->check_vibration();
 	//******************落地前********************
-	if((pos_control->get_desired_velocity().z<0)&&(get_vib_value()>param->vib_land.value)&&(motors->get_throttle()<motors->get_throttle_hover())&&(!motors->limit.throttle_lower)){//TODO:降落时防止弹起来
+	if((get_vel_z()<0)&&(pos_control->get_desired_velocity().z<0)&&(get_vib_value()>param->vib_land.value)&&(motors->get_throttle()<motors->get_throttle_hover())&&(!motors->limit.throttle_lower)){//TODO:降落时防止弹起来
 		disarm_motors();
 	}
 	//******************落地后ls*********************
@@ -3076,6 +3085,9 @@ void throttle_loop(void){
 //油门0，偏航最小时关闭电机。
 //注意不是手动油门时，只有在降落状态时才能用手势关闭电机。
 void arm_motors_check(void){
+	if(!rc_channels_healthy()){
+		return;
+	}
 	static int16_t arming_counter;
 	float throttle=get_channel_throttle();
 	// ensure throttle is down
@@ -3150,6 +3162,9 @@ void set_throttle_zero_flag(float throttle_control)
 //channel8 < 0.1时解锁电机, channel8 > 0.9时锁定电机
 static uint8_t disarm_counter=0;
 void lock_motors_check(void){
+	if(!rc_channels_healthy()){
+		return;
+	}
 	set_throttle_zero_flag(get_channel_throttle());
 	float ch8=get_channel_8();
 	if(ch8>0&&ch8<0.1){

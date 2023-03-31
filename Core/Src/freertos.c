@@ -543,7 +543,7 @@ void GnssTask(void *argument)
 #if USE_GNSS==0
 	osThreadTerminate(gnssTaskHandle);
 #endif
-	GPS_Init(UM482); // GPS_Init() task will block 10s
+	Gnss_Init(UM482); // GPS_Init() task will block 10s
     uint8_t state_flag=0;
   /* Infinite loop */
   for(;;)
@@ -551,7 +551,7 @@ void GnssTask(void *argument)
 	  if(state_flag<4){
 		  FMU_LED5_Control(true);
 	  }else{
-		  FMU_LED5_Control(get_gps_state());// gps state
+		  FMU_LED5_Control(get_gnss_state());// gps state
 	  }
 	  gnss_update();
 	  state_flag++;
