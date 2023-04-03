@@ -81,7 +81,7 @@
 #define USE_MAG 1 // if use mag, set 1; if not use mag, set 0;
 
 //配置GNSS
-#define USE_GNSS 1 // if use gnss, set 1; if not use gnss, set 0;
+#define USE_GNSS 0 // if use gnss, set 1; if not use gnss, set 0;
 
 //配置UWB
 #define USE_UWB 0 // if use uwb, set 1; if don't use uwb, set 0;
@@ -90,7 +90,7 @@
 #define USE_FLOW 0 // if use optical flow, set 1; if don't use optical flow, set 0;
 
 //配置里程计
-#define USE_ODOMETRY 0 // if use odometry, set 1; if don't use odometry, set 0;
+#define USE_ODOMETRY 1 // if use odometry, set 1; if don't use odometry, set 0;
 
 //配置flash
 #define USE_FRAM 2 //保持默认值,请勿更改
