@@ -38,8 +38,8 @@ bool mode_init(void){
  * (2) channel5>0.9时为无人车模式, channel5<=0.9时为空中模式;
  * (3) 在空中模式下:
  * 		channel6>0.7为自稳模式;
- * 		0.7>=channel6>0.3为定高模式;
- * 		0.3>=channel6为自主导航模式;
+ * 		0.7>=channel6>0.3为自主导航模式;
+ * 		0.3>=channel6为位置模式;
  * (4) 在无人车模式下:
  *		channel6>0.7为遥控直通模式;
  * 		0.7>=channel6>0.3为无人车定速模式;
@@ -79,15 +79,15 @@ void mode_update(void){
 				}
 			}
 		}else if(ch6>0.3){
-			if(robot_sub_mode!=MODE_ALTHOLD){
-				if(mode_althold_init()){
-					robot_sub_mode=MODE_ALTHOLD;
-				}
-			}
-		}else{
 			if(robot_sub_mode!=MODE_AUTONAV){
 				if(mode_autonav_init()){
 					robot_sub_mode=MODE_AUTONAV;
+				}
+			}
+		}else{
+			if(robot_sub_mode!=MODE_POSHOLD){
+				if(mode_poshold_init()){
+					robot_sub_mode=MODE_POSHOLD;
 				}
 			}
 		}

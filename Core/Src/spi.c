@@ -279,7 +279,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
 
     /* SPI4 DMA Init */
     /* SPI4_RX Init */
-    hdma_spi4_rx.Instance = DMA1_Stream0;
+    hdma_spi4_rx.Instance = DMA2_Stream0;
     hdma_spi4_rx.Init.Request = DMA_REQUEST_SPI4_RX;
     hdma_spi4_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_spi4_rx.Init.PeriphInc = DMA_PINC_DISABLE;
@@ -297,7 +297,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     __HAL_LINKDMA(spiHandle,hdmarx,hdma_spi4_rx);
 
     /* SPI4_TX Init */
-    hdma_spi4_tx.Instance = DMA1_Stream1;
+    hdma_spi4_tx.Instance = DMA2_Stream1;
     hdma_spi4_tx.Init.Request = DMA_REQUEST_SPI4_TX;
     hdma_spi4_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
     hdma_spi4_tx.Init.PeriphInc = DMA_PINC_DISABLE;

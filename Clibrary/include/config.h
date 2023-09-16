@@ -48,11 +48,12 @@
 #define RC_INPUT_RANGE 	1000.0f // 脉宽 1000us
 
 //串口模式
+#define CONFIG_COMM 0x00 //配置模式
 #define DEV_COMM 	0x01 //自定义模式
 #define MAV_COMM  	0x02 //Mavlink模式
 #define GPS_COMM  	0x03 //GPS模式
 #define TFMINI_COMM 0X04 //TFmini激光测距仪
-#define LC302_COMM 0X05 //LC302光流
+#define LC302_COMM  0X05 //LC302光流
 
 /***************usb+串口配置****************
  * *************COMM_0:USB口***************
@@ -81,7 +82,7 @@
 #define USE_MAG 1 // if use mag, set 1; if not use mag, set 0;
 
 //配置GNSS
-#define USE_GNSS 0 // if use gnss, set 1; if not use gnss, set 0;
+#define USE_GNSS 1 // if use gnss, set 1; if not use gnss, set 0;
 
 //配置UWB
 #define USE_UWB 0 // if use uwb, set 1; if don't use uwb, set 0;
@@ -90,7 +91,10 @@
 #define USE_FLOW 0 // if use optical flow, set 1; if don't use optical flow, set 0;
 
 //配置里程计
-#define USE_ODOMETRY 1 // if use odometry, set 1; if don't use odometry, set 0;
+#define USE_ODOMETRY 0 // if use odometry, set 1; if don't use odometry, set 0;
+
+//配置锁定模式
+#define USE_CH8_LOCK 1
 
 //配置flash
 #define USE_FRAM 2 //保持默认值,请勿更改
@@ -111,7 +115,7 @@
 	#define DATA_FLASH_LENGTH ((uint32_t)0x00000020) /* each data package takes 32 bytes */
 #endif
 
-#define VERSION_HARDWARE 712
-#define VERSION_FIRMWARE 2023011301
+#define VERSION_HARDWARE 716
+#define VERSION_FIRMWARE 2023040101
 
 #endif /* INCLUDE_CONFIG_H_ */

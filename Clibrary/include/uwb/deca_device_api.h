@@ -1987,7 +1987,7 @@ void decamutexoff(decaIrqStatus_t s) ;
  *
  * no return value
  */
-void deca_sleep(unsigned int time_ms);
+void deca_sleep(uint32_t time_ms);
 
 double dwt_getrangebias(uint8_t chan, float range, uint8_t prf);
 

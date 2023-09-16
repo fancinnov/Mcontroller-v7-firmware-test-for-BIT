@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-#include "deca_version.h"
+#include <uwb/deca_version.h>
 
 
 /****************************************************************************//**

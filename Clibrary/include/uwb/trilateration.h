@@ -9,11 +9,15 @@
 //
 // -------------------------------------------------------------------------------------------------------------------
 //
-
+#pragma once
 #ifndef __TRILATERATION_H__
 #define __TRILATERATION_H__
 
 #include "hal.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //#define SHOW_PRINTS
 
@@ -65,4 +69,9 @@ void Th_Location(vec3d * anchorArray,int * distanceArray);
 void Th_Location2(vec3d * anchorArray,int * distanceArray);
 
 double vdist(const vec3d v1, const vec3d v2);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

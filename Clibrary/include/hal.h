@@ -196,7 +196,6 @@ void uwb_position_update(void);
 void ekf_baro_alt(void);
 void ekf_rf_alt(void);
 void ekf_odom_xy(void);
-void ekf_opticalflow_xy(void);
 void ekf_gnss_xy(void);
 void throttle_loop(void);
 void get_tfmini_data(uint8_t buf);
@@ -302,7 +301,7 @@ HAL_I2C_StateTypeDef I2C_GetState(void);
  * @param
  *  FirstBit: 大端在前或小端在前
  *  		SPI_FIRSTBIT_MSB / SPI_FIRSTBIT_LSB
- *  Prescaler: 波特率分频,SPI时钟频率=84/X Mhz,
+ *  Prescaler: 波特率分频,SPI时钟频率=96/X Mhz,
  *  		SPI_BAUDRATEPRESCALER_X (X=2/4/8/16/32/64/128/256)
  *  CPol: 空闲时刻的时钟电平
  *  		SPI_POLARITY_LOW / SPI_POLARITY_HIGH
@@ -351,7 +350,7 @@ void reset_sensors(void);
 uint8_t get_lc302_data(uint8_t buf);//解析成功返回0,未解析完返回1,解析失败返回2
 
 //激光驱动
-void vl53lxx_init(void);
+bool vl53lxx_init(void);
 void vl53lxx_update(void);
 
 /***fram驱动函数为底层驱动，它的上层函数在Cpplibrary中的flash.h***/
@@ -386,7 +385,7 @@ extern uint16_t log_file_index_num;
 FRESULT sd_log_start(void);
 FRESULT Write_Gnss_File(void);
 FRESULT Read_Gnss_File(void);
-FRESULT sd_get_file_name(void);
+FRESULT sd_get_file_name(mavlink_channel_t chan);
 void sd_send_log_file(mavlink_channel_t chan, uint16_t file_index);
 void sd_log_write(const char* s, ...);
 void sd_log_end(void);
@@ -529,6 +528,7 @@ void comm_send_data(void);//把缓冲区中的数据以非阻塞方式从MAVLINK
 extern uint8_t HeartBeatFlags;//判断EVENTBIT_HEARTBEAT_COMM_0~EVENTBIT_HEARTBEAT_COMM_4五个通道是否有心跳包接收
 
 //ADC
+void adc_init(void);
 void adc_update(void);			// 刷新全部adc数据
 float get_batt_volt(void);   	// 获取外部电池供电电压值，Unit:V
 float get_batt_current(void);	// 获取外部电池供电电流值，Unit:A
@@ -657,6 +657,7 @@ HAL_StatusTypeDef sbus_output_buf_delayms(uint8_t* buf, uint16_t size, uint32_t 
 void RC_Input_Init(uint8_t mode);//初始化遥控接收机（PPM/SBUS）
 void RC_Input_Loop(void);//接收遥控器数据
 void rc_range_cal(void);
+void reset_rc_channels(void);
 void set_rc_channels_override(bool set);//设置Mavlink覆盖遥控器信号
 bool get_rc_channels_override(void);//获取Mavlink覆盖遥控器信号
 void override_rc_channels(uint16_t *pwm_in);

@@ -22,55 +22,55 @@
 /* ****************Dev code end*********************
  * *************************************************/
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Attitude and Position Control pid parameters // 已设实际参数用于动力较强的机型, 注释中的参数可用于动力适中的机型, 动力越强的机型PID内环越小。  //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define AC_ATTITUDE_CONTROL_ANGLE_ROLL_P                      8.0f             // default angle P gain for roll 4.5f
-#define AC_ATTITUDE_CONTROL_ANGLE_PITCH_P                     8.0f             // default angle P gain for pitch 4.5f
-#define AC_ATTITUDE_CONTROL_ANGLE_YAW_P                       5.0f             // default angle P gain for yaw 4.5f
+////////////////////////////////////////////////////
+// Attitude and Position Control pid parameters ////
+////////////////////////////////////////////////////
+#define AC_ATTITUDE_CONTROL_ANGLE_ROLL_P                      4.5f
+#define AC_ATTITUDE_CONTROL_ANGLE_PITCH_P                     4.5f
+#define AC_ATTITUDE_CONTROL_ANGLE_YAW_P                       4.5f
 
 // default rate controller PID gains
 #ifndef AC_ATC_MULTI_RATE_PITCH_P
-  # define AC_ATC_MULTI_RATE_PITCH_P          0.04f //0.135
+  # define AC_ATC_MULTI_RATE_PITCH_P          0.135f
 #endif
 
 #ifndef AC_ATC_MULTI_RATE_PITCH_I
-  # define AC_ATC_MULTI_RATE_PITCH_I          0.02f //0.072
+  # define AC_ATC_MULTI_RATE_PITCH_I          0.135f
 #endif
 
 #ifndef AC_ATC_MULTI_RATE_PITCH_D
-  # define AC_ATC_MULTI_RATE_PITCH_D          0.001f //0.0036
+  # define AC_ATC_MULTI_RATE_PITCH_D          0.0036f
 #endif
 
 #ifndef AC_ATC_MULTI_RATE_ROLL_P
-  # define AC_ATC_MULTI_RATE_ROLL_P           0.04f//0.135
+  # define AC_ATC_MULTI_RATE_ROLL_P           0.135f
 #endif
 
 #ifndef AC_ATC_MULTI_RATE_ROLL_I
-  # define AC_ATC_MULTI_RATE_ROLL_I           0.02f //0.072
+  # define AC_ATC_MULTI_RATE_ROLL_I           0.135f
 #endif
 
 #ifndef AC_ATC_MULTI_RATE_ROLL_D
-  # define AC_ATC_MULTI_RATE_ROLL_D           0.001f//0.0036
+  # define AC_ATC_MULTI_RATE_ROLL_D           0.0036f
 #endif
 
 #ifndef AC_ATC_MULTI_RATE_RP_IMAX
- # define AC_ATC_MULTI_RATE_RP_IMAX         0.3f  //0.5
+ # define AC_ATC_MULTI_RATE_RP_IMAX         0.3f
 #endif
 #ifndef AC_ATC_MULTI_RATE_RP_FILT_HZ
  # define AC_ATC_MULTI_RATE_RP_FILT_HZ      20.0f
 #endif
 #ifndef AC_ATC_MULTI_RATE_YAW_P
- # define AC_ATC_MULTI_RATE_YAW_P           0.16f //0.2
+ # define AC_ATC_MULTI_RATE_YAW_P           0.3f
 #endif
 #ifndef AC_ATC_MULTI_RATE_YAW_I
- # define AC_ATC_MULTI_RATE_YAW_I           0.016f //0.02
+ # define AC_ATC_MULTI_RATE_YAW_I           0.03f
 #endif
 #ifndef AC_ATC_MULTI_RATE_YAW_D
- # define AC_ATC_MULTI_RATE_YAW_D           0.0f //0.125
+ # define AC_ATC_MULTI_RATE_YAW_D           0.0f
 #endif
 #ifndef AC_ATC_MULTI_RATE_YAW_IMAX
- # define AC_ATC_MULTI_RATE_YAW_IMAX        0.3f //0.5
+ # define AC_ATC_MULTI_RATE_YAW_IMAX        0.3f
 #endif
 #ifndef AC_ATC_MULTI_RATE_YAW_FILT_HZ
  # define AC_ATC_MULTI_RATE_YAW_FILT_HZ     2.5f
@@ -85,11 +85,11 @@
 #define POSCONTROL_ACC_Z_IMAX                 500     // vertical acceleration controller IMAX gain default
 #define POSCONTROL_ACC_Z_FILT_HZ              20.0f   // vertical acceleration controller input filter default
 #define POSCONTROL_ACC_Z_DT                   0.0025f // vertical acceleration controller dt default
-#define POSCONTROL_POS_XY_P                   0.8f    // horizontal position controller P gain default 1.0
-#define POSCONTROL_VEL_XY_P                   0.4f    // horizontal velocity controller P gain default 2.0
-#define POSCONTROL_VEL_XY_I                   0.2f    // horizontal velocity controller I gain default 1.0
-#define POSCONTROL_VEL_XY_D                   0.1f    // horizontal velocity controller D gain default 0.5
-#define POSCONTROL_VEL_XY_IMAX                50.0f  // horizontal velocity controller IMAX gain default 200
+#define POSCONTROL_POS_XY_P                   1.0f    // horizontal position controller P gain default 1.0
+#define POSCONTROL_VEL_XY_P                   1.5f    // horizontal velocity controller P gain default 2.0
+#define POSCONTROL_VEL_XY_I                   0.5f    // horizontal velocity controller I gain default 1.0
+#define POSCONTROL_VEL_XY_D                   0.5f    // horizontal velocity controller D gain default 0.5
+#define POSCONTROL_VEL_XY_IMAX                100.0f  // horizontal velocity controller IMAX gain default 200
 #define POSCONTROL_VEL_XY_FILT_HZ             5.0f    // horizontal velocity controller input filter default 5.0
 #define POSCONTROL_VEL_XY_FILT_D_HZ           5.0f    // horizontal velocity controller input filter for D default 5.0
 
@@ -149,7 +149,7 @@
  # define AUTO_LAND_SPEED              30.0f         // maximum vertical velocity down in cm/s
 #endif
 #ifndef PILOT_ACCEL_Z_DEFAULT
- # define PILOT_ACCEL_Z_DEFAULT       100.0f         // vertical acceleration in cm/s/s while altitude is under pilot control
+ # define PILOT_ACCEL_Z_DEFAULT       250.0f         // vertical acceleration in cm/s/s while altitude is under pilot control
 #endif
 
 #ifndef RANGEFINDER_GAIN_DEFAULT
@@ -165,15 +165,15 @@
 #endif
 
 #ifndef RANGEFINDER_GLITCH_ALT_CM
- # define RANGEFINDER_GLITCH_ALT_CM  200.0f      // amount of rangefinder change to be considered a glitch
+ # define RANGEFINDER_GLITCH_ALT_CM  30.0f      // amount of rangefinder change to be considered a glitch
 #endif
 
 #ifndef RANGEFINDER_GLITCH_NUM_SAMPLES
- # define RANGEFINDER_GLITCH_NUM_SAMPLES    3   // number of rangefinder glitches in a row to take new reading
+ # define RANGEFINDER_GLITCH_NUM_SAMPLES    40   // number of rangefinder glitches in a row to take new reading
 #endif
 
 #ifndef PILOT_TKOFF_ALT_DEFAULT
- # define PILOT_TKOFF_ALT_DEFAULT           150     // default final alt above home for pilot initiated takeoff
+ # define PILOT_TKOFF_ALT_DEFAULT           100     // default final alt above home for pilot initiated takeoff
 #endif
 
 #ifndef LAND_RANGEFINDER_MIN_ALT_CM
@@ -209,6 +209,26 @@
 #define ALT_RETURN	1000.0f			//10m
 #define VOLTAGE_GAIN 1.0f
 #define CURRENT_GAIN 1.0f
+#define UWB_YAW_DELTA_DEG 0.0f
+#define UWB_GAIN 1.0f
+#define UWB_TAG_ID 1U
+#define UWB_TAG_MAX 1U
+
+#define UWB_POS1_X  80.0f
+#define UWB_POS1_Y -80.0f
+#define UWB_POS1_Z 160.0f
+
+#define UWB_POS2_X   0.0f
+#define UWB_POS2_Y 320.0f
+#define UWB_POS2_Z 170.0f
+
+#define UWB_POS3_X 320.0f
+#define UWB_POS3_Y 480.0f
+#define UWB_POS3_Z 170.0f
+
+#define UWB_POS4_X 320.0f
+#define UWB_POS4_Y   0.0f
+#define UWB_POS4_Z 170.0f
 
 bool arm_motors(void);
 void disarm_motors(void);
@@ -234,6 +254,7 @@ float ahrs_sin_pitch(void);					//俯仰角正弦值
 float ahrs_cos_yaw(void);					//偏航角余弦值
 float ahrs_sin_yaw(void);					//偏航角正弦值
 const Vector3f& get_accel_ef(void);			//地球坐标系下的三轴加速度
+const Vector3f& get_accel_ef_filt(void);	//滤波后地球坐标系下的三轴加速度
 const Vector3f& get_gyro_ef(void);			//地球坐标系下的三轴角速度
 const Vector3f& get_accel_correct(void);	//修正后的三轴机体加速度
 const Vector3f& get_gyro_correct(void);		//修正后的三轴机体角速度
@@ -273,7 +294,6 @@ float get_vel_z(void);//cm/s
 float get_uwb_x(void);
 float get_uwb_y(void);
 float get_uwb_z(void);
-uint32_t get_uwb_last_ms(void);
 
 float get_mav_x_target(void);
 float get_mav_y_target(void);
@@ -289,6 +309,7 @@ float get_mav_yaw_rate_target(void);
 
 float get_vib_value(void);
 float get_vib_angle_z(void);
+
 bool get_gcs_connected(void);
 bool get_offboard_connected(void);
 bool get_gnss_location_state(void);
@@ -314,6 +335,8 @@ bool mode_mecanum_init(void);
 void mode_mecanum(void);
 bool mode_perch_init(void);
 void mode_perch(void);
+void mode_ugv_a(void);
+void mode_ugv_v(void);
 
 // Documentation of GLobals:
 typedef union {
@@ -384,6 +407,7 @@ extern Rangefinder_state rangefinder_state;
 typedef struct {
 	bool healthy;
 	float flow_dt;
+	uint32_t last_healthy_ms=0;
 	LowPassFilterVector2f vel_filter;
 	Vector2f rads;
 	Vector2f vel;
@@ -394,7 +418,8 @@ extern Opticalflow_state opticalflow_state;
 typedef enum{
 	none=0,
 	tag=1,
-	anchor
+	anchor,
+	range
 }uwb_modes;
 
 typedef enum {
@@ -805,6 +830,48 @@ typedef struct{
 		dataflash_type type=FLOAT;
 		float value=CURRENT_GAIN;
 	}current_gain;
+
+	struct uwb_yaw_delta_deg{
+		uint16_t num=45;
+		dataflash_type type=FLOAT;
+		float value=UWB_YAW_DELTA_DEG;
+	}uwb_yaw_delta_deg;
+
+	struct uwb_tag_id{
+		uint16_t num=46;
+		dataflash_type type=UINT8;
+		uint8_t value=UWB_TAG_ID;
+	}uwb_tag_id;
+
+	struct uwb_tag_max{
+		uint16_t num=47;
+		dataflash_type type=UINT8;
+		uint8_t value=UWB_TAG_MAX;
+	}uwb_tag_max;
+
+	struct uwb_anchor01_pos{
+		uint16_t num=48;
+		dataflash_type type=VECTOR3F;
+		Vector3f value={UWB_POS1_X, UWB_POS1_Y, UWB_POS1_Z};
+	}uwb_anchor01_pos;
+
+	struct uwb_anchor02_pos{
+		uint16_t num=49;
+		dataflash_type type=VECTOR3F;
+		Vector3f value={UWB_POS2_X, UWB_POS2_Y, UWB_POS2_Z};
+	}uwb_anchor02_pos;
+
+	struct uwb_anchor03_pos{
+		uint16_t num=50;
+		dataflash_type type=VECTOR3F;
+		Vector3f value={UWB_POS3_X, UWB_POS3_Y, UWB_POS3_Z};
+	}uwb_anchor03_pos;
+
+	struct uwb_anchor04_pos{
+		uint16_t num=51;
+		dataflash_type type=VECTOR3F;
+		Vector3f value={UWB_POS4_X, UWB_POS4_Y, UWB_POS4_Z};
+	}uwb_anchor04_pos;
 
 	/* *************************************************
 	 * ****************Dev code begin*******************/

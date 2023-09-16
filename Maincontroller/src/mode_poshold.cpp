@@ -30,6 +30,14 @@ bool mode_poshold_init(void){
 	set_manual_throttle(false);//设置为自动油门
 	Buzzer_set_ring_type(BUZZER_MODE_SWITCH);
 	usb_printf("switch mode poshold!\n");
+	float ch7=get_channel_7();
+	if(ch7>=0.7&&ch7<=1.0){//姿态模式
+		usb_printf("enter submode attitude!\n");
+	}else if(ch7>0.3&&ch7<0.7){//位置模式
+		usb_printf("enter submode position!\n");
+	}else{
+		usb_printf("enter submode mission!\n");
+	}
 	return true;
 }
 

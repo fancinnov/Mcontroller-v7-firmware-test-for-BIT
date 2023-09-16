@@ -119,13 +119,6 @@ const osThreadAttr_t gnssTask_attributes = {
   .stack_size = 500 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for uwbTask */
-osThreadId_t uwbTaskHandle;
-const osThreadAttr_t uwbTask_attributes = {
-  .name = "uwbTask",
-  .stack_size = 500 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for imuTask */
 osThreadId_t imuTaskHandle;
 const osThreadAttr_t imuTask_attributes = {
@@ -173,7 +166,6 @@ void MavSendTask(void *argument);
 void BuzzerTask(void *argument);
 void SDLogTask(void *argument);
 void GnssTask(void *argument);
-void UWBTask(void *argument);
 void IMUTask(void *argument);
 void MagTask(void *argument);
 
@@ -254,9 +246,6 @@ void MX_FREERTOS_Init(void) {
   /* creation of gnssTask */
   gnssTaskHandle = osThreadNew(GnssTask, NULL, &gnssTask_attributes);
 
-  /* creation of uwbTask */
-  uwbTaskHandle = osThreadNew(UWBTask, NULL, &uwbTask_attributes);
-
   /* creation of imuTask */
   imuTaskHandle = osThreadNew(IMUTask, NULL, &imuTask_attributes);
 
@@ -306,6 +295,7 @@ void InitTask(void *argument)
   set_s3_baudrate(115200);
   set_s4_baudrate(115200);
   usb_printf("\r\nSystem: Mcontroller-V%ld-%ld initializing ...\r\n",VERSION_HARDWARE, VERSION_FIRMWARE);
+  adc_init();
   FRAM_Init();
   update_dataflash();
   RC_Input_Init(RC_INPUT_SBUS);
@@ -313,13 +303,9 @@ void InitTask(void *argument)
   IMU_Init();
   MAG_Init();
   while(BARO_Init());
-  vl53lxx_init();
   motors_init();
   attitude_init();
   pos_init();
-  if(!uwb_init()){
-  	  osThreadTerminate(uwbTaskHandle);
-  }
   if(mode_init()){
 	  Buzzer_set_ring_type(BUZZER_INITIALED);
 	  usb_printf("System initialized succeed!\r\n");
@@ -357,7 +343,6 @@ void Loop400hzTask(void *argument)
 	  /***Do not change code above and change or add new code below***/
 	  ekf_odom_xy();
 	  ekf_gnss_xy();
-	  ekf_opticalflow_xy();
 	  mode_update();
 	  set_motors_value();
 	  set_servos_value();
@@ -383,9 +368,8 @@ void Loop200hzTask(void *argument)
   for(;;)
   {
 	  osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
-	  comm_callback();
 	  usbsend_callback();
-	  vl53lxx_update();
+	  adc_update();
   }
   /* USER CODE END Loop200hzTask */
 }
@@ -431,9 +415,8 @@ void Loop50hzTask(void *argument)
   for(;;)
   {
 	  osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
+	  comm_callback();
 	  RC_Input_Loop();
-	  adc_update();
-	  uwb_position_update();
   }
   /* USER CODE END Loop50hzTask */
 }
@@ -540,7 +523,7 @@ void GnssTask(void *argument)
 	while(!initialed_task){
 		osDelay(1000);
 	}
-#if USE_GNSS==0
+#if (!USE_GNSS)||USE_UWB
 	osThreadTerminate(gnssTaskHandle);
 #endif
 	Gnss_Init(UM482); // GPS_Init() task will block 10s
@@ -561,30 +544,6 @@ void GnssTask(void *argument)
 	  osDelay(100);
   }
   /* USER CODE END GnssTask */
-}
-
-/* USER CODE BEGIN Header_UWBTask */
-/**
-* @brief Function implementing the uwbTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_UWBTask */
-void UWBTask(void *argument)
-{
-  /* USER CODE BEGIN UWBTask */
-	while(!initialed_task){
-		osDelay(1000);
-	}
-#if USE_UWB==0
-	osThreadTerminate(uwbTaskHandle);
-#endif
-  /* Infinite loop */
-  for(;;)
-  {
-	  uwb_update();
-  }
-  /* USER CODE END UWBTask */
 }
 
 /* USER CODE BEGIN Header_IMUTask */

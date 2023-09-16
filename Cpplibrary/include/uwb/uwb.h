@@ -16,15 +16,19 @@
 #include "common.h"
 #ifdef __cplusplus
 
-#define RX_BUF_LEN 24
+#define RX_BUF_LEN 127
 
 class UWB{
 public:
 	/// Constructor
 	UWB();
 	bool get_uwb_position=false;
-	int Anchordistance[4];
+	bool get_uwb_distance=false;
+	int Anchordistance[4]={0};
+	uint16_t Anchorvolt[4]={0};
+	int Tagdistance[127]={0};
 	Vector3f uwb_position;
+	uint8_t TAG_ID=1;
 	bool uwb_init(void);
 	void uwb_update(void);
 	void config_uwb(uwb_modes mode, uint8_t id, uint8_t tag_master, uint8_t tag_start, uint8_t tag_max, uint8_t anchor_max);
@@ -34,7 +38,7 @@ private:
 	/* Default communication configuration. We use here EVK1000's default mode (mode 3). */
 	dwt_config_t config =
 	{
-	    2,               /* Channel number. */
+	    5,               /* Channel number. */
 	    DWT_PRF_64M,     /* Pulse repetition frequency. */
 	    DWT_PLEN_1024,   /* Preamble length. */
 	    DWT_PAC32,       /* Preamble acquisition chunk size. Used in RX only. */
@@ -56,8 +60,9 @@ private:
 		release,
 		release_confirm,
 		release_wait,
-		time,
-		statistics
+		comm,
+		waiting,
+		ranging
 	}uwb_states;
 
 	/* Frames used in the ranging process. See NOTE 2 below. */
@@ -73,7 +78,7 @@ private:
 	uint8_t rx_poll_msg[8] =  	{0x41, 0x88, 0, 0x0, 0xDE, 0x21, 0, 0};
 	uint8_t tx_resp_msg[11] =  	{0x41, 0x88, 0, 0x0, 0xDE, 0x10, 0x02, 0, 0, 0, 0};
 	uint8_t rx_final_msg[20] = 	{0x41, 0x88, 0, 0x0, 0xDE, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	uint8_t distance_msg[15] = 	{0x41, 0x88, 0, 0x0, 0xDE, 0xAA, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	uint8_t distance_msg[17] = 	{0x41, 0x88, 0, 0x0, 0xDE, 0xAA, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	uint8_t tx_poll_msg[8] =  	{0x41, 0x88, 0, 0x0, 0xDE, 0x21, 0, 0};
 	uint8_t rx_resp_msg[11] =  	{0x41, 0x88, 0, 0x0, 0xDE, 0x10, 0x02, 0, 0, 0, 0};
 	uint8_t tx_final_msg[20] = 	{0x41, 0x88, 0, 0x0, 0xDE, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -84,6 +89,7 @@ private:
 	uint8_t Master_Release_Semaphore[9] =         	{0x41, 0x88, 0, 0x0, 0xDE, 0xE2, 0, 0, 0};
 	uint8_t Tag_Statistics_response[9] =          	{0x41, 0x88, 0, 0x0, 0xDE, 0xE3, 0, 0, 0};
 	uint8_t Master_Release_Semaphore_comfirm[9] = 	{0x41, 0x88, 0, 0x0, 0xDE, 0xE4, 0, 0, 0};
+	uint8_t comm_msg[RX_BUF_LEN+2];
 
 	/* Frame sequence number, incremented after each transmission. */
 	uint8_t frame_seq_nb = 0;
@@ -133,7 +139,6 @@ private:
 	void compute_angle_send_to_anchor0(int distance1, int distance2, int distance3);
 	void distance_mange(void);
 
-	uint8_t TAG_ID=1;
 	uint8_t MASTER_TAG=1;
 	uint8_t MAX_SLAVE_TAG=1;
 	uint8_t SLAVE_TAG_START_INDEX=1;
@@ -143,6 +148,9 @@ private:
 	uint8_t Semaphore[255];
 	vec3d AnchorList[4];
 	vec3d tag_best_solution;
+	float L[3]={0.0f};
+	float A[3*3]={0.0f};
+	float A_INV[3*3]={0.0f};
 
 	uint8_t anchor_index = 0;
 	uint8_t tag_index = 0;
@@ -150,9 +158,8 @@ private:
 	uint8_t Semaphore_Enable = 0 ;
 	uint8_t Waiting_TAG_Release_Semaphore = 0;
 	uint32_t frame_len = 0;
-	uint32_t dis_time=0,tag_time=0;
-	bool last_tag=false;
-	bool last_last_tag=false;
+	uint32_t tag_time=0,wait_time=0;
+	uint8_t last_tag=0;
 	uwb_states uwb_state=idle;
 	uwb_modes uwb_mode=none;
 
@@ -172,6 +179,7 @@ private:
 	uint8_t delta_ts_anchor2_num=0;
 	uint8_t delta_ts_anchor3_num=0;
 	bool get_all_tag_delta_ts=false;
+	uint16_t volt=0;
 };
 
 #endif
