@@ -21,7 +21,7 @@
 #include "i2c.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "hal.h"
 /* USER CODE END 0 */
 
 I2C_HandleTypeDef hi2c1;
@@ -280,7 +280,19 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
     /* I2C1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(I2C1_EV_IRQn);
   /* USER CODE BEGIN I2C1_MspDeInit 1 */
-
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin = I2C_EXT_SDA_Pin|I2C_EXT_SCL_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(I2C_EXT_SCL_GPIO_Port, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(I2C_EXT_SCL_GPIO_Port, I2C_EXT_SCL_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(I2C_EXT_SDA_GPIO_Port, I2C_EXT_SDA_Pin, GPIO_PIN_SET);
+	for(uint8_t i=0;i<10;i++){
+		osThreadYield();
+		HAL_GPIO_WritePin(I2C_EXT_SCL_GPIO_Port, I2C_EXT_SCL_Pin, GPIO_PIN_RESET);
+		osThreadYield();
+		HAL_GPIO_WritePin(I2C_EXT_SCL_GPIO_Port, I2C_EXT_SCL_Pin, GPIO_PIN_SET);
+	}
   /* USER CODE END I2C1_MspDeInit 1 */
   }
   else if(i2cHandle->Instance==I2C2)

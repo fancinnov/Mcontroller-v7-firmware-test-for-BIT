@@ -165,11 +165,11 @@
 #endif
 
 #ifndef RANGEFINDER_GLITCH_ALT_CM
- # define RANGEFINDER_GLITCH_ALT_CM  30.0f      // amount of rangefinder change to be considered a glitch
+ # define RANGEFINDER_GLITCH_ALT_CM  15.0f      // amount of rangefinder change to be considered a glitch
 #endif
 
 #ifndef RANGEFINDER_GLITCH_NUM_SAMPLES
- # define RANGEFINDER_GLITCH_NUM_SAMPLES    40   // number of rangefinder glitches in a row to take new reading
+ # define RANGEFINDER_GLITCH_NUM_SAMPLES    50   // number of rangefinder glitches in a row to take new reading
 #endif
 
 #ifndef PILOT_TKOFF_ALT_DEFAULT
@@ -219,14 +219,14 @@
 #define UWB_POS1_Z 160.0f
 
 #define UWB_POS2_X   0.0f
-#define UWB_POS2_Y 320.0f
+#define UWB_POS2_Y 400.0f
 #define UWB_POS2_Z 170.0f
 
-#define UWB_POS3_X 320.0f
-#define UWB_POS3_Y 480.0f
+#define UWB_POS3_X 400.0f
+#define UWB_POS3_Y 400.0f
 #define UWB_POS3_Z 170.0f
 
-#define UWB_POS4_X 320.0f
+#define UWB_POS4_X 400.0f
 #define UWB_POS4_Y   0.0f
 #define UWB_POS4_Z 170.0f
 
@@ -337,6 +337,14 @@ bool mode_perch_init(void);
 void mode_perch(void);
 void mode_ugv_a(void);
 void mode_ugv_v(void);
+
+/*
+ * demo函数声明
+ * */
+void uwb_send(void);
+void uwb_receive(void);
+void uwb_range_tx(void);
+void uwb_range_rx(void);
 
 // Documentation of GLobals:
 typedef union {

@@ -36,6 +36,7 @@ extern CompassCalibrator *compassCalibrator;
 extern AccelCalibrator *accelCalibrator;
 extern DataFlash *dataflash;
 extern SDLog *sdlog;
+extern UWB *uwb;
 
 const float _dt=0.0025;
 void send_mavlink_param_list(mavlink_channel_t chan);
@@ -58,6 +59,7 @@ bool get_return(void);
 void set_takeoff(void);
 bool get_takeoff(void);
 bool takeoff_running(void);
+void takeoff_stop(void);
 bool takeoff_triggered( float target_climb_rate);
 void takeoff_start(float alt_cm);
 void set_throttle_takeoff(void);

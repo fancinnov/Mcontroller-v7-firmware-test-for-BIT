@@ -59,5 +59,6 @@ private:
 	float rf_alt_delta=0, rf_alt_last=0, gnss_alt_delta=0, baro_alt_delta=0, baro_alt_offset=0;
 	float K_gain=0.0f;
 	bool rf_correct=false;
+	uint8_t rf_correct_flag=0;
 };
 #endif /* INCLUDE_EKF_EKF_BARO_H_ */

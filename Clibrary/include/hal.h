@@ -222,6 +222,7 @@ void comm4_callback(uint8_t data);
 /****************c/c++ interface*******************************/
 bool get_task_initialed(void);
 
+void config_callback(void);
 void comm_callback(void);
 void COMM1_Callback(void);//串口1中断回调函数
 void COMM2_Callback(void);//串口2中断回调函数

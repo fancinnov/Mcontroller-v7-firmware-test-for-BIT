@@ -22,6 +22,20 @@ class UWB{
 public:
 	/// Constructor
 	UWB();
+	/* Default communication configuration. We use here EVK1000's default mode (mode 3). */
+	dwt_config_t config =
+	{
+		5,               /* Channel number. */
+		DWT_PRF_64M,     /* Pulse repetition frequency. */
+		DWT_PLEN_1024,   /* Preamble length. */
+		DWT_PAC32,       /* Preamble acquisition chunk size. Used in RX only. */
+		9,               /* TX preamble code. Used in TX only. */
+		9,               /* RX preamble code. Used in RX only. */
+		1,               /* Use non-standard SFD (Boolean) */
+		DWT_BR_110K,     /* Data rate. */
+		DWT_PHRMODE_STD, /* PHY header mode. */
+		(1025 + 64 - 32) /* SFD timeout (preamble length + 1 + SFD length - PAC size). Used in RX only. */
+	};
 	bool get_uwb_position=false;
 	bool get_uwb_distance=false;
 	int Anchordistance[4]={0};
@@ -33,22 +47,13 @@ public:
 	void uwb_update(void);
 	void config_uwb(uwb_modes mode, uint8_t id, uint8_t tag_master, uint8_t tag_start, uint8_t tag_max, uint8_t anchor_max);
 	void set_anchor_positon(uint8_t id, double x, double y, double z);
+	uint64_t get_sys_timestamp_u64(void);
+	uint64_t get_tx_timestamp_u64(void);
+	uint64_t get_rx_timestamp_u64(void);
+	void final_msg_get_ts(const uint8_t *ts_field, uint32_t *ts);
+	void final_msg_set_ts(uint8_t *ts_field, uint32_t ts);
 
 private:
-	/* Default communication configuration. We use here EVK1000's default mode (mode 3). */
-	dwt_config_t config =
-	{
-	    5,               /* Channel number. */
-	    DWT_PRF_64M,     /* Pulse repetition frequency. */
-	    DWT_PLEN_1024,   /* Preamble length. */
-	    DWT_PAC32,       /* Preamble acquisition chunk size. Used in RX only. */
-	    9,               /* TX preamble code. Used in TX only. */
-	    9,               /* RX preamble code. Used in RX only. */
-	    1,               /* Use non-standard SFD (Boolean) */
-	    DWT_BR_110K,     /* Data rate. */
-	    DWT_PHRMODE_STD, /* PHY header mode. */
-	    (1025 + 64 - 32) /* SFD timeout (preamble length + 1 + SFD length - PAC size). Used in RX only. */
-	};
 
 	typedef enum{
 		idle=0,
@@ -131,11 +136,6 @@ private:
 	void Semaphore_Init(void);
 	int Sum_Tag_Semaphore_request(void);
 	/* Declaration of static functions. */
-	uint64_t get_sys_timestamp_u64(void);
-	uint64_t get_tx_timestamp_u64(void);
-	uint64_t get_rx_timestamp_u64(void);
-	void final_msg_get_ts(const uint8_t *ts_field, uint32_t *ts);
-	void final_msg_set_ts(uint8_t *ts_field, uint32_t ts);
 	void compute_angle_send_to_anchor0(int distance1, int distance2, int distance3);
 	void distance_mange(void);
 

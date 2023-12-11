@@ -119,6 +119,13 @@ const osThreadAttr_t gnssTask_attributes = {
   .stack_size = 500 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for uwbTask */
+osThreadId_t uwbTaskHandle;
+const osThreadAttr_t uwbTask_attributes = {
+  .name = "uwbTask",
+  .stack_size = 500 * 4,
+  .priority = (osPriority_t) osPriorityNormal1,
+};
 /* Definitions for imuTask */
 osThreadId_t imuTaskHandle;
 const osThreadAttr_t imuTask_attributes = {
@@ -166,6 +173,7 @@ void MavSendTask(void *argument);
 void BuzzerTask(void *argument);
 void SDLogTask(void *argument);
 void GnssTask(void *argument);
+void UWBTask(void *argument);
 void IMUTask(void *argument);
 void MagTask(void *argument);
 
@@ -246,6 +254,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of gnssTask */
   gnssTaskHandle = osThreadNew(GnssTask, NULL, &gnssTask_attributes);
 
+  /* creation of uwbTask */
+  uwbTaskHandle = osThreadNew(UWBTask, NULL, &uwbTask_attributes);
+
   /* creation of imuTask */
   imuTaskHandle = osThreadNew(IMUTask, NULL, &imuTask_attributes);
 
@@ -303,9 +314,13 @@ void InitTask(void *argument)
   IMU_Init();
   MAG_Init();
   while(BARO_Init());
+  vl53lxx_init();
   motors_init();
   attitude_init();
   pos_init();
+  if(!uwb_init()){
+  	  osThreadTerminate(uwbTaskHandle);
+  }
   if(mode_init()){
 	  Buzzer_set_ring_type(BUZZER_INITIALED);
 	  usb_printf("System initialized succeed!\r\n");
@@ -415,8 +430,14 @@ void Loop50hzTask(void *argument)
   for(;;)
   {
 	  osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
+#if COMM_0==CONFIG_COMM
+	  config_callback();
+#else
 	  comm_callback();
+#endif
 	  RC_Input_Loop();
+	  uwb_position_update();
+	  vl53lxx_update();
   }
   /* USER CODE END Loop50hzTask */
 }
@@ -440,7 +461,9 @@ void HeartbeatTask(void *argument)
   for(;;)
   {
 	  FMU_LED1_Control(true);
+#if COMM_0!=CONFIG_COMM
 	  send_mavlink_heartbeat_data();
+#endif
 	  osDelay(100);
 	  FMU_LED1_Control(false);
 	  sdled_update();
@@ -544,6 +567,30 @@ void GnssTask(void *argument)
 	  osDelay(100);
   }
   /* USER CODE END GnssTask */
+}
+
+/* USER CODE BEGIN Header_UWBTask */
+/**
+* @brief Function implementing the uwbTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_UWBTask */
+void UWBTask(void *argument)
+{
+  /* USER CODE BEGIN UWBTask */
+	while(!initialed_task){
+		osDelay(1000);
+	}
+#if USE_UWB==0
+	osThreadTerminate(uwbTaskHandle);
+#endif
+  /* Infinite loop */
+  for(;;)
+  {
+	  uwb_update();
+  }
+  /* USER CODE END UWBTask */
 }
 
 /* USER CODE BEGIN Header_IMUTask */

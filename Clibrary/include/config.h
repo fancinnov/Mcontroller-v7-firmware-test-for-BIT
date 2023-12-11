@@ -94,7 +94,7 @@
 #define USE_ODOMETRY 0 // if use odometry, set 1; if don't use odometry, set 0;
 
 //配置锁定模式
-#define USE_CH8_LOCK 1
+#define USE_CH8_LOCK 0
 
 //配置flash
 #define USE_FRAM 2 //保持默认值,请勿更改
@@ -115,7 +115,7 @@
 	#define DATA_FLASH_LENGTH ((uint32_t)0x00000020) /* each data package takes 32 bytes */
 #endif
 
-#define VERSION_HARDWARE 716
-#define VERSION_FIRMWARE 2023040101
+#define VERSION_HARDWARE 718
+#define VERSION_FIRMWARE 2023120501
 
 #endif /* INCLUDE_CONFIG_H_ */
